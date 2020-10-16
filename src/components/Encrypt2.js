@@ -11,7 +11,7 @@ class Encrypt2 extends React.Component {
          <div>
             <Alert />
             <Nav />
-            <h1>Mine as well have an about page...</h1>
+            <h1>This is where the second encryption demo will go!</h1>
          </div>
       )
    }

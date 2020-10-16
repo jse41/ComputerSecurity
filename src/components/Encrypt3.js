@@ -11,7 +11,7 @@ class Encrypt3 extends React.Component {
          <div>
             <Alert />
             <Nav />
-            <h1>Mine as well have an about page...</h1>
+            <h1>Well we need 3 Encryption Algorithms...</h1>
          </div>
       )
    }
