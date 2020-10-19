@@ -29,7 +29,7 @@ function Nav() {
             </li>
             <li className="nav-item">
               <div className="nav-link">
-                <Link to="/encrypt1">Encrypt1</Link>
+                <Link to="/encrypt1">Vigenere Cipher</Link>
               </div>
             </li>
             <li className="nav-item">
