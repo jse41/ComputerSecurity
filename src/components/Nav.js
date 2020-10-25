@@ -34,7 +34,7 @@ function Nav() {
             </li>
             <li className="nav-item">
               <div className="nav-link">
-                <Link to="/encrypt2">Encrypt2</Link>
+                <Link to="/encrypt2">DES</Link>
               </div>
             </li>
             <li className="nav-item">
