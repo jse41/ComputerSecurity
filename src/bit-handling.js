@@ -38,13 +38,31 @@ function circularLeftShift(original, size, amount) {
     if (amount === 0) return original;
 
     const leftMostBit = getBit(original, size - 1);
-    const shifted = original << 1;
-    const circularShifted = setBit(shifted, 0, leftMostBit);
-    return circularLeftShift(circularShifted, size, amount - 1);
+    let shifted = original << 1;
+    shifted = setBit(shifted, size, 0); // Clear the shifted bit
+    shifted = setBit(shifted, 0, leftMostBit); // Wrap it around
+    return circularLeftShift(shifted, size, amount - 1);
+}
+
+/**
+ * Apply a permutation to a binary number, and return the result
+ * @param {number} bits - The original bits
+ * @param {number[]} table - The permutation table
+ */
+function permutate(bits, table) {
+    let number = 0;
+
+    for (let i = 0; i < table.length; i++) {
+        const movingValue = getBit(bits, table[i]);
+        number = setBit(number, i, movingValue);
+    }
+
+    return number;
 }
 
 module.exports = {
     getBit,
     setBit,
     circularLeftShift,
+    permutate,
 }
