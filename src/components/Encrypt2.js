@@ -23,6 +23,7 @@ class Encrypt2 extends React.Component {
       }
 
       this.handleUpdate = this.handleUpdate.bind(this);
+      this.doEncryption = this.doEncryption.bind(this);
    }
 
    handleUpdate(prop, e) {
@@ -89,9 +90,17 @@ class Encrypt2 extends React.Component {
       return text;
    }
 
-   encrypt(message, key) {
+   doEncryption() {
+      console.log()
+
+      let binaryKey = 0;
+
+      for (let i = 0;i < Math.min(this.state.key.length, 4);i++) {
+         binaryKey = bitHandling.joinPieces(binaryKey, this.state.key.charCodeAt(i), 16);
+      }
+
       const keys = this.generateKeys({
-         originalKey: key,
+         originalKey: binaryKey,
          PC1: this.makePermutationTable(64, 56),
          PC2: this.makePermutationTable(64, 56),
       });
@@ -101,17 +110,17 @@ class Encrypt2 extends React.Component {
       //const key = this.key();
       let blockNum = 0;
 
-      const paddedMessage = this.addPadding(message);
+      const paddedMessage = this.addPadding(this.state.plaintext);
       //const length = paddedMessage.length;
 
-      console.log(`Entire Message: ${message}`);
+      console.log(`Entire Message: ${this.state.plaintext}`);
       console.log(`Padded Message: ${paddedMessage}`);
 
       //while (blockNum*bits < length){
-         const messageBlock = message.substring(blockNum*bits, (blockNum+1)*bits);
+         const messageBlock = this.state.plaintext.substring(blockNum*bits, (blockNum+1)*bits);
          console.log(`64 bit Block of Message: ${messageBlock}`);
 
-         const IPMessage = this.initialPermutation(message);
+         const IPMessage = this.initialPermutation(this.state.plaintext);
 
          const L0 = IPMessage.substring(0, IPMessage.length/2);
          const R0 = IPMessage.substring(IPMessage.length/2);
@@ -145,10 +154,10 @@ class Encrypt2 extends React.Component {
                   <Form.Label>Key</Form.Label>
                   <Form.Control type="text" value={this.state.key}  onChange={this.handleUpdate.bind(this, 'key')} placeholder="Key to Use" />
                   <Form.Text className="text-muted">
-                     The key to use (any string of 8 characters)
+                     The key to use (any string of 4 characters)
                   </Form.Text>
                </Form.Group>
-            <Button variant="primary">
+            <Button variant="primary" onClick={this.doEncryption}>
                Encrypt
             </Button>
             </Form>

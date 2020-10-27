@@ -77,15 +77,21 @@ function makeHalves(bits, length) {
     return [leftHalf, rightHalf];
 }
 
+function joinPieces(left, right, rightSize) {
+    return (left << rightSize) | right;
+}
+
 function fromHalves(left, right, eachHalf) {
-    return (left << eachHalf) | right;
+    return joinPieces(left, right, eachHalf);
 }
 
 module.exports = {
+    bitString,
     getBit,
     setBit,
     circularLeftShift,
     permutate,
     makeHalves,
+    joinPieces,
     fromHalves,
 }
