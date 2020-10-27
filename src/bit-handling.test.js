@@ -34,3 +34,15 @@ it('permutate works correctly', () => {
     expect(bitHandling.permutate(original, table_1)).toEqual(result_1);
     expect(bitHandling.permutate(original, table_2)).toEqual(result_2);
 })
+
+it('makeHalves works correctly', () => {
+    expect(bitHandling.makeHalves(0b111010, 6)).toEqual([0b111, 0b010]);
+    expect(bitHandling.makeHalves(0, 6)).toEqual([0, 0]);
+    expect(bitHandling.makeHalves(0b111111, 6)).toEqual([0b111, 0b111]);
+})
+
+it('fromHalves works correctly', () => {
+    expect(bitHandling.fromHalves(0b111, 0b010, 3)).toEqual(0b111010);
+    expect(bitHandling.fromHalves(0, 0, 3)).toEqual(0);
+    expect(bitHandling.fromHalves(0b111, 0b111, 3)).toEqual(0b111111);
+})

@@ -1,3 +1,12 @@
+// eslint-disable-next-line no-unused-vars
+function bitString(bits, size) {
+    let string = '';
+    for (let i = 0;i < size; i++) {
+        string = getBit(bits, i) + string;
+    }
+    return string;
+}
+
 /**
  * Gets the value of the bit at the specified index
  * @param {number} binary - The binary number
@@ -60,9 +69,23 @@ function permutate(bits, table) {
     return number;
 }
 
+function makeHalves(bits, length) {
+    const leftMask = ~0b0 << (length / 2);
+    const rightMask = ~leftMask;
+    const leftHalf = (leftMask & bits) >>> (length / 2);
+    const rightHalf = rightMask & bits;
+    return [leftHalf, rightHalf];
+}
+
+function fromHalves(left, right, eachHalf) {
+    return (left << eachHalf) | right;
+}
+
 module.exports = {
     getBit,
     setBit,
     circularLeftShift,
     permutate,
+    makeHalves,
+    fromHalves,
 }
