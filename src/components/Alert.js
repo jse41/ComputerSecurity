@@ -7,7 +7,7 @@ import './styling/Alert.css';
  */
 function Alertprac() {  
     return (
-      <Alert className="working" variant="dark">
+      <Alert className="alaWorking" variant="dark" style={{textAlign: "left", margin: 0}} >
         <Alert.Heading>Hey! What are you doing here?</Alert.Heading>
         <p>
           It's nice to see you, but you are a little early to the party! This site is still in early development, 
