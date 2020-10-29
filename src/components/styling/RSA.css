@@ -1,0 +1,9 @@
+.steps {
+  text-align: left;
+}
+
+.user-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
