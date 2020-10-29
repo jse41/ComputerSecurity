@@ -6,6 +6,7 @@ import About from './components/About'
 import Encrypt1 from './components/Encrypt1'
 import Encrpty2 from './components/Encrypt2'
 import Encrypt3 from './components/Encrypt3'
+import Encrypt4 from './components/Encrypt4'
 
 class App extends Component {
   constructor(props) {
@@ -27,9 +28,10 @@ class App extends Component {
             <Switch>
                 <Route path="/" exact render={(props) => <Home {...props} info={this.state} updateMe={this.updateMe}/>}/>
                 <Route path="/about" render={(props) => <About {...props} info={this.state} updateMe={this.updateMe}/>}/>
-                <Route path="/encrypt1" render={(props) => <Encrypt1 {...props} info={this.state} updateMe={this.updateMe}/>}/>
-                <Route path="/encrypt2" render={(props) => <Encrpty2 {...props} info={this.state} updateMe={this.updateMe}/>}/>
-                <Route path="/encrypt3" render={(props) => <Encrypt3 {...props} info={this.state} updateMe={this.updateMe}/>}/>
+                <Route path="/Vigenere" render={(props) => <Encrypt1 {...props} info={this.state} updateMe={this.updateMe}/>}/>
+                <Route path="/DES" render={(props) => <Encrpty2 {...props} info={this.state} updateMe={this.updateMe}/>}/>
+                <Route path="/RSA" render={(props) => <Encrypt3 {...props} info={this.state} updateMe={this.updateMe}/>}/>
+                <Route path="/MD5" render={(props) => <Encrypt4 {...props} info={this.state} updateMe={this.updateMe}/>}/>
                 <Route component={Error} />
             </Switch>
           </BrowserRouter>

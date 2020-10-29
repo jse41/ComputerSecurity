@@ -38,17 +38,22 @@ function Nav() {
           </li>
           <li className='nav-item'>
             <div className='nav-link'>
-              <Link to='/encrypt1'>Vigenere Cipher</Link>
+              <Link to='/Vigenere'>Vigenere Cipher</Link>
             </div>
           </li>
           <li className='nav-item'>
             <div className='nav-link'>
-              <Link to='/encrypt2'>DES</Link>
+              <Link to='/DES'>DES</Link>
             </div>
           </li>
           <li className='nav-item'>
             <div className='nav-link'>
-              <Link to='/encrypt3'>RSA</Link>
+              <Link to='/RSA'>RSA</Link>
+            </div>
+          </li>
+          <li className='nav-item'>
+            <div className='nav-link'>
+              <Link to='/MD5'>MD5</Link>
             </div>
           </li>
         </ul>
