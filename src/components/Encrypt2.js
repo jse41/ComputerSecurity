@@ -29,7 +29,6 @@ class Encrypt2 extends React.Component {
 
    
    handleFormUpdate(e) {
-      console.log("handle form update");
       if(e.target.id === "EncryptUpdate") {
          this.setState({plaintext: e.target.value});
       }
