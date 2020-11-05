@@ -2,14 +2,13 @@ import React from 'react';
 import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
-import {circularLeftShift} from './../bit-handling';
+import {circularLeftShift, getBit, setBit} from './../bit-handling';
 
 function md5(message) {
    let binaryVis = getBinaryVisual(message)
    let binary = getBinary(message)
    let result = makeMD5(binary)
    console.log("result")
-   console.log(binary)
    console.log(result)
    return binaryVis
 }
@@ -110,7 +109,7 @@ function makeMD5(messageBlocks) {
             F = C ^ (B | (~D))
             g = (7 * i) % 16
          }
-         F = limitedAdd(F, limitedAdd(A, limitedAdd(K[i], messageBlocks[16 * block + g])))
+         F = limitedAdd(limitedAdd(F, A), limitedAdd(K[i], messageBlocks[16 * block + g]))
          A = D
          D = C
          C = B
@@ -125,6 +124,30 @@ function makeMD5(messageBlocks) {
 }
 
 function limitedAdd(a, b) {
+   return ((a + b) & 0xFFFFFFFF)
+}
+
+function limitedAdd___(a, b) {
+   let result = 0
+   let carry = 0
+   for(let i = 0; i < 32; i++) {
+      let bita = getBit(a, i)
+      let bitb = getBit(b, i)
+      let temp = carry + bita + bitb
+      if(temp === 1 || temp === 3){
+         result += 2**i
+      }
+      if(temp > 1) {
+         carry = 1
+      }
+      if(temp < 2) {
+         carry = 0 
+      }
+   }
+   return result 
+}
+
+function limitedAdd__(a, b) {
    let result = a + b
    let resultString = result.toString(2)
    let len = resultString.length
