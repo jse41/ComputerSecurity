@@ -2,11 +2,14 @@ import React from 'react';
 import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
-import {bitString} from './../bit-handling';
+import {circularLeftShift} from './../bit-handling';
 
 function md5(message) {
    let binaryVis = getBinaryVisual(message)
    let binary = getBinary(message)
+   let result = makeMD5(binary)
+   console.log("result")
+   console.log(result)
    return binaryVis
 }
 
@@ -54,6 +57,62 @@ function getBinary(input) {
    }
 }
 
+function getDefaults() {
+   let K = []
+   for (let i = 0; i < 64; i++) {
+      K.push(Math.floor(2 ** 32 * Math.abs(Math.sin(i + 1))))
+   }
+   return K
+}
+
+function makeMD5(messageBlocks) {
+   let rotate_amounts = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
+   let K = getDefaults()
+   let a0 = 0x67452301   // A
+   let b0 = 0xefcdab89   // B
+   let c0 = 0x98badcfe   // C
+   let d0 = 0x10325476   // D
+   for (let block = 0; block < Math.floor(messageBlocks / 16); block++) {
+      let A = a0
+      let B = b0
+      let C = c0
+      let D = d0 
+      for (let i = 0; i < 64; i++) {
+         let F = 0
+         let g = 0
+         if (i < 16) {
+            F = (B & C) | ((~B) & D)
+            g = i
+         }
+         else if (i >= 16 && i < 32) {
+            F = (D & B) | ((~D) & C)
+            g = (5 * i + 1) % 16
+         }
+         else if (i >= 32 && i < 48) {
+            F = B ^ C ^ D
+            g = (3 * i + 5) % 16
+         }
+         else if (i >= 48) {
+            F = C ^ (B | (~D))
+            g = (7 * i) % 16
+         }
+         F = F + A + K[i] + messageBlocks[16 * block + g]
+         A = D
+         D = C
+         C = B
+         B += circularLeftShift(F, 32, rotate_amounts[i])
+      }
+      a0 += A
+      b0 += B
+      c0 += C
+      d0 += D
+   }
+   return [a0, b0, c0, d0]
+}
+
 /**
  * About Page Wrapper, relies on React Router for routing to here
  */
@@ -93,7 +152,6 @@ class Encrypt4 extends React.Component {
                </Form.Text>
             </Form.Group>
             <p>{this.state.result}</p>
-
             </Form>
          </div>
       )
