@@ -9,6 +9,7 @@ function md5(message) {
    let binary = getBinary(message)
    let result = makeMD5(binary)
    console.log("result")
+   console.log(binary)
    console.log(result)
    return binaryVis
 }
@@ -25,6 +26,14 @@ function getBinaryVisual(input) {
 }
 
 function getBinary(input) {
+   if (input.length === 0) {
+      let output = [] 
+      output.push(0b10000000000000000000000000000000)
+      for (let i = 0; i < 15; i++) {
+         output.push(0b00000000)
+      }
+      return output
+   }
    let totalLength = input.length * 8
    let numBlocks = Math.ceil(totalLength / 512)
    let output = [] 
@@ -70,12 +79,14 @@ function makeMD5(messageBlocks) {
       5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
       4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
       6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
+
    let K = getDefaults()
    let a0 = 0x67452301   // A
    let b0 = 0xefcdab89   // B
    let c0 = 0x98badcfe   // C
    let d0 = 0x10325476   // D
-   for (let block = 0; block < Math.floor(messageBlocks / 16); block++) {
+
+   for (let block = 0; block < Math.floor(messageBlocks.length / 16); block++) {
       let A = a0
       let B = b0
       let C = c0
@@ -99,18 +110,37 @@ function makeMD5(messageBlocks) {
             F = C ^ (B | (~D))
             g = (7 * i) % 16
          }
-         F = F + A + K[i] + messageBlocks[16 * block + g]
+         F = limitedAdd(F, limitedAdd(A, limitedAdd(K[i], messageBlocks[16 * block + g])))
          A = D
          D = C
          C = B
-         B += circularLeftShift(F, 32, rotate_amounts[i])
+         B = limitedAdd(B, circularLeftShift(F, 32, rotate_amounts[i]))
       }
-      a0 += A
-      b0 += B
-      c0 += C
-      d0 += D
+      a0 = limitedAdd(a0, A)
+      b0 = limitedAdd(b0, B)
+      c0 = limitedAdd(c0, C)
+      d0 = limitedAdd(d0, D)
    }
-   return [a0, b0, c0, d0]
+   return [a0.toString(2), b0.toString(2), c0.toString(2), d0.toString(2)]
+}
+
+function limitedAdd(a, b) {
+   let result = a + b
+   let resultString = result.toString(2)
+   let len = resultString.length
+   if (len > 32) {
+      let newResult = 0
+      for(let i = 0; i < 32; i++) {
+         newResult = newResult << 1
+         if(resultString[len -32 + i] === "1"){
+            newResult += 1
+         }
+      }
+      return newResult
+   }
+   else {
+      return result
+   }
 }
 
 /**
