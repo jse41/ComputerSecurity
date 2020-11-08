@@ -56,10 +56,10 @@ class Encrypt2 extends React.Component {
 
       for (let round = 0;round < N_ROUNDS;round++) {
          const shifts = NUM_LHS[round];
-         const c = bitHandling.circularLeftShift(left, 28, shifts);
-         const d = bitHandling.circularLeftShift(right, 28, shifts);
+         left = bitHandling.circularLeftShift(left, 28, shifts);
+         right = bitHandling.circularLeftShift(right, 28, shifts);
 
-         const newKey = bitHandling.permutate(bitHandling.fromHalves(c, d, 28), PC2);
+         const newKey = bitHandling.permutate(bitHandling.fromHalves(left, right, 28), PC2);
          keys.push(newKey);
       }
 
