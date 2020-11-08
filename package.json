@@ -6,10 +6,12 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "big-integer": "^1.6.48",
     "bootstrap": "^4.5.3",
     "react": "^16.14.0",
     "react-bootstrap": "^1.3.0",
     "react-dom": "^16.14.0",
+    "react-latex": "^2.0.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3"
   },
@@ -17,7 +19,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "utils-tests": "jest . --testPathIgnorePatterns=App.test.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -33,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "jest": "24.9.0"
   }
 }
