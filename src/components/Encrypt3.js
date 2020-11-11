@@ -8,7 +8,7 @@ import Latex from 'react-latex';
 /**
  * About Page Wrapper, relies on React Router for routing to here
  */
-
+/* global BigInt */
 function ascii_encrypt(message) {
   var i;
   var text = "";
@@ -43,7 +43,7 @@ function rsa_encrypt(message, e, N) {
   var i;
   var text = "";
   for (i = 0; i < message.length; i++) {
-    text += Math.pow(parseInt(message[i]), e) % N + ' ';
+    text += Number((BigInt(parseInt(message[i]))**BigInt(e)) % BigInt(N)) + ' ';
   }
   text = text.substring(0, text.length - 1);
   return text;
@@ -55,17 +55,17 @@ function rsa_decrypt(message, d, N) {
   var i;
   var text = "";
   for (i = 0; i < message.length; i++) {
-    console.log(Math.pow(parseInt(message[i]), d))
-    text += Math.pow(parseInt(message[i]), d) % N + ' ';
+    text += Number((BigInt(parseInt(message[i]))**BigInt(d)) % BigInt(N)) + ' ';
   }
   text = text.substring(0, text.length - 1);
   return text;
 }
 
+console.log('A Big Hedgehog');
 console.log(ascii_encrypt('A Big Hedgehog'));
-console.log(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3363));
-console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3363), 1935, 3363));
-console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3363), 1935, 3363)));
+console.log(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127));
+console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127), 2631, 3127));
+console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127), 2631, 3127)));
 
 function gcd(a, b) {
   if ((typeof a !== 'number') || (typeof a !== 'number')) 
@@ -80,7 +80,7 @@ function gcd(a, b) {
 
 function isPrime(val) {
   for (var i = 2; i <= Math.sqrt(val); i++) {
-    if (val % i == 0) {
+    if (val % i === 0) {
       return false;
     }
   }
@@ -104,7 +104,7 @@ function isValid_e(e, p, q) {
 function isValid_d(d, e, p, q) {
   var phi = calc_phi_n(p, q);
   var mod = (d*e) % phi;
-  if (mod == 1) {
+  if (mod === 1) {
     return true;
   } else {
     return false;
