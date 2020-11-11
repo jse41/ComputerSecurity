@@ -1,4 +1,5 @@
-import React from 'react';
+ /* eslint-disable */
+import React, { useEffect, useState } from 'react';
 import Alert from './Alert';
 import Nav from './Nav';
 import './styling/RSA.css';
@@ -112,6 +113,17 @@ function isValid_d(d, e, p, q) {
 }
 
 const Encrypt3 = () => {
+
+  // keeps track of p and q values and uses set function in inputs
+  const [p, setP] = useState('');
+  const [q, setQ] = useState('');
+  const [n, setN] = useState('');
+
+  // only called when p or q changes, updates n using the function
+  useEffect(() => { 
+    setN(calc_n(p, q))
+  }, [p, q])
+
   return (
     <div>
       <Alert />
@@ -130,13 +142,13 @@ const Encrypt3 = () => {
                 <Form.Label>
                   <Latex>$p$: </Latex>
                 </Form.Label>
-                <Form.Control type='number' placeholder='enter p' />
+                <Form.Control type='number' placeholder='enter p' value={p} onChange={event => setP(event.target.value)} />
               </Form.Group>
               <Form.Group className='form-inline'>
                 <Form.Label>
                   <Latex>$q$: </Latex>
                 </Form.Label>
-                <Form.Control type='number' placeholder='enter q' />
+                <Form.Control type='number' placeholder='enter q' value={q} onChange={event => setQ(event.target.value)} />
               </Form.Group>
             </div>
           </ListGroup.Item>
@@ -146,7 +158,8 @@ const Encrypt3 = () => {
               <Latex>Calculate $N = p \times q$</Latex>
             </p>
             <p>
-              <Latex>$N = $</Latex>
+              <Latex>$N =\ $</Latex>
+                {n}
             </p>
           </ListGroup.Item>
 
@@ -218,8 +231,8 @@ const Encrypt3 = () => {
               <Latex>ASCII Encryption (Sender/encryptor number m): </Latex>
             </p>
             <p>
-              {/* Use ascii_encrypt() here */}
-              <ascii_encrypt message='ABC'/>
+              {/* Use ascii_encrypt() here, since we're not rendering anything on screen, we call it as a function */} 
+              {ascii_encrypt('A Big Hedgehog')}
             </p>
           </ListGroup.Item>
 
