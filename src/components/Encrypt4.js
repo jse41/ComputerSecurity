@@ -5,11 +5,12 @@ import {Form} from 'react-bootstrap';
 import {circularLeftShift, getBit, setBit} from './../bit-handling';
 
 function md5(message) {
-   let binaryVis = getBinaryVisual(message)
+   let binaryVis = getBinary(message)
    let binary = getBinary(message)
    let result = makeMD5(binary)
    console.log("result")
-   console.log(result)
+   console.log(getBinary(""))
+   console.log(makeMD5(getBinary("")))
    return binaryVis
 }
 
@@ -25,19 +26,21 @@ function getBinaryVisual(input) {
 }
 
 function getBinary(input) {
+   let output = [] 
    if (input.length === 0) {
-      let output = [] 
       output.push(0b10000000000000000000000000000000)
       for (let i = 0; i < 15; i++) {
-         output.push(0b00000000)
+         output.push(0x00000000)
       }
       return output
    }
    let totalLength = input.length * 8
-   let numBlocks = Math.ceil(totalLength / 512)
-   let output = [] 
+   let numBlocks = 1 
+   let tempLength = totalLength - 448
+   if (Math.ceil(tempLength / 512) > 0)
+      numBlocks += Math.ceil(tempLength / 512)
    for (let i = 0; i < numBlocks * 16; i++) {
-      output.push(0b00000000)
+      output.push(0x00000000)
    }
    let index
    for (index = 0; index < input.length; index++) {
@@ -45,10 +48,7 @@ function getBinary(input) {
       output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << 8
       output[Math.floor(index / 4)] = output[Math.floor(index / 4)] | value
    }
-   if (index >= numBlocks * 16 * 4) {
-      return output
-   }
-   else { 
+   if (index < numBlocks * 16 * 4 - 8) {
       if (index % 4 === 0) {
          let value = 0b00000001
          output[(index / 4)] = value
@@ -61,14 +61,31 @@ function getBinary(input) {
          output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << 7
          output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << ((3 - (index % 4)) * 8)
       }
-      return output
    }
+   let appendedLen = totalLength % (2 ** 64)
+   let appendStr = appendedLen.toString(2)
+   for(let i = 0; i < appendStr.length; i++){
+      if (i < 32){
+         console.log(output[output.length - 1])
+         output[output.length - 1] = output[output.length - 1] << 1
+         if (appendStr[i] === '1') {
+            output[output.length - 1] = output[output.length - 1] | 0x00000001
+         }
+      }
+      else {
+         output[output.length - 2] = output[output.length - 2] << 1
+         if (appendStr[i] === '1') {
+            output[output.length - 2] = output[output.length - 2] | 0x00000001
+         }
+      }
+   }
+   return output
 }
 
 function getDefaults() {
    let K = []
    for (let i = 0; i < 64; i++) {
-      K.push(Math.floor(2 ** 32 * Math.abs(Math.sin(i + 1))))
+      K.push(Math.floor((2 ** 32) * Math.abs(Math.sin(i + 1))))
    }
    return K
 }
@@ -91,8 +108,8 @@ function makeMD5(messageBlocks) {
       let C = c0
       let D = d0 
       for (let i = 0; i < 64; i++) {
-         let F = 0
-         let g = 0
+         let F = 0x00000000
+         let g = 0x00000000
          if (i < 16) {
             F = (B & C) | ((~B) & D)
             g = i
@@ -113,7 +130,7 @@ function makeMD5(messageBlocks) {
          A = D
          D = C
          C = B
-         B = limitedAdd(B, circularLeftShift(F, 32, rotate_amounts[i]))
+         B = limitedAdd(B, leftrotate(F, rotate_amounts[i]))
       }
       a0 = limitedAdd(a0, A)
       b0 = limitedAdd(b0, B)
@@ -123,7 +140,26 @@ function makeMD5(messageBlocks) {
    return [a0.toString(2), b0.toString(2), c0.toString(2), d0.toString(2)]
 }
 
+function leftrotate(x, c) {
+   return (x << c) | x >> (32 - c)
+}
+
+
+//!!! THE ERROR IS IN HERE, HANDLES "Negative" NUMBERS INCORRECTLY !!!
+// THE NUMBERS ARE NOT REALLY NEGATIVE, THEY JUST HAVE A 1 in POSITION 31 
 function limitedAdd(a, b) {
+   if(a < 0) {
+      console.log("ERRORSSSA")
+      console.log(a)
+      console.log(setBit(a, 31, 0))
+      //a *= -1
+   }
+   if(b < 0) {
+      console.log("ERRORSSSB")
+      console.log(b.toString(2))
+      console.log((b * -1).toString(2))
+      //b *= -1
+   }
    return ((a + b) & 0xFFFFFFFF)
 }
 
