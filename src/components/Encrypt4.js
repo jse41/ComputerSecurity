@@ -2,18 +2,133 @@ import React from 'react';
 import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
-import {circularLeftShift, getBit, setBit} from './../bit-handling';
 
-function md5(message) {
-   let binaryVis = getBinary(message)
-   let binary = getBinary(message)
-   let result = makeMD5(binary)
-   console.log("result")
-   console.log(getBinary(""))
-   console.log(makeMD5(getBinary("")))
-   return binaryVis
+function md5cycle(x, k) {
+   var a = x[0], b = x[1], c = x[2], d = x[3];
+
+   let rotate_amounts = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
+   
+   let K = getDefaults()
+
+   for (let index = 0; index < 64; index++) {
+      let F = 0x00000000
+      let g = 0x00000000
+      if (index < 16) {
+         g = index
+         F = ff(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 16 && index < 32) {
+         g = (5 * index + 1) % 16
+         F = gg(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 32 && index < 48) {
+         g = (3 * index + 5) % 16
+         F = hh(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 48) {
+         g = (7 * index) % 16
+         F = ii(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      a = d
+      d = c
+      c = b
+      b = F 
+   }
+
+   x[0] = add32(a, x[0]);
+   x[1] = add32(b, x[1]);
+   x[2] = add32(c, x[2]);
+   x[3] = add32(d, x[3]);
+
 }
 
+function collect(q, a, b, x, s, t) {
+   a = add32(add32(a, q), add32(x, t));
+   return add32((a << s) | (a >>> (32 - s)), b);
+}
+
+function ff(a, b, c, d, x, s, t) {
+   return collect((b & c) | ((~b) & d), a, b, x, s, t);
+}
+
+function gg(a, b, c, d, x, s, t) {
+   return collect((b & d) | (c & (~d)), a, b, x, s, t);
+}
+
+function hh(a, b, c, d, x, s, t) {
+   return collect(b ^ c ^ d, a, b, x, s, t);
+}
+
+function ii(a, b, c, d, x, s, t) {
+   return collect(c ^ (b | (~d)), a, b, x, s, t);
+}
+
+function add32(a, b) {
+   return (a + b) & 0xFFFFFFFF;
+}
+
+function getDefaults() {
+   let K = []
+   for (let i = 0; i < 64; i++) {
+      K.push(Math.floor((2 ** 32) * Math.abs(Math.sin(i + 1))))
+   }
+   return K
+}
+
+function makeMD5(s) {
+   var n = s.length, i;
+   var initials = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
+   for (i = 64; i <= s.length; i += 64) {
+      md5cycle(initials, md5blk(s.substring(i - 64, i)));
+   }
+   s = s.substring(i - 64);
+   var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+   for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+   tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+   if (i > 55) {
+      md5cycle(initials, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
+   }
+   tail[14] = n * 8;
+   md5cycle(initials, tail);
+   return initials;
+}
+
+function md5blk(s) {
+   let md5blks = [], i;
+   for (i = 0; i < 64; i += 4) {
+      md5blks[i >> 2] = s.charCodeAt(i)
+         + (s.charCodeAt(i + 1) << 8)
+         + (s.charCodeAt(i + 2) << 16)
+         + (s.charCodeAt(i + 3) << 24);
+   }
+   return md5blks;
+}
+
+function makeHex(n) {
+   let hex_chr = '0123456789abcdef'.split('');
+   let s = '';
+   for (let index = 0; index < 4; index++)
+      s += hex_chr[(n >> (index * 8 + 4)) & 0x0F]
+         + hex_chr[(n >> (index * 8)) & 0x0F];
+   return s;
+}
+
+function hex(x) {
+   for (var i = 0; i < x.length; i++)
+      x[i] = makeHex(x[i]);
+   return x.join('');
+}
+
+function md5(message) {
+   return hex(makeMD5(message));
+}
+
+/** 
 function getBinaryVisual(input) {
    let output = ""
    for (var i = 0; i < input.length; i++) {
@@ -81,126 +196,7 @@ function getBinary(input) {
    }
    return output
 }
-
-function getDefaults() {
-   let K = []
-   for (let i = 0; i < 64; i++) {
-      K.push(Math.floor((2 ** 32) * Math.abs(Math.sin(i + 1))))
-   }
-   return K
-}
-
-function makeMD5(messageBlocks) {
-   let rotate_amounts = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
-      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
-
-   let K = getDefaults()
-   let a0 = 0x67452301   // A
-   let b0 = 0xefcdab89   // B
-   let c0 = 0x98badcfe   // C
-   let d0 = 0x10325476   // D
-
-   for (let block = 0; block < Math.floor(messageBlocks.length / 16); block++) {
-      let A = a0
-      let B = b0
-      let C = c0
-      let D = d0 
-      for (let i = 0; i < 64; i++) {
-         let F = 0x00000000
-         let g = 0x00000000
-         if (i < 16) {
-            F = (B & C) | ((~B) & D)
-            g = i
-         }
-         else if (i >= 16 && i < 32) {
-            F = (D & B) | ((~D) & C)
-            g = (5 * i + 1) % 16
-         }
-         else if (i >= 32 && i < 48) {
-            F = B ^ C ^ D
-            g = (3 * i + 5) % 16
-         }
-         else if (i >= 48) {
-            F = C ^ (B | (~D))
-            g = (7 * i) % 16
-         }
-         F = limitedAdd(limitedAdd(F, A), limitedAdd(K[i], messageBlocks[16 * block + g]))
-         A = D
-         D = C
-         C = B
-         B = limitedAdd(B, leftrotate(F, rotate_amounts[i]))
-      }
-      a0 = limitedAdd(a0, A)
-      b0 = limitedAdd(b0, B)
-      c0 = limitedAdd(c0, C)
-      d0 = limitedAdd(d0, D)
-   }
-   return [a0.toString(2), b0.toString(2), c0.toString(2), d0.toString(2)]
-}
-
-function leftrotate(x, c) {
-   return (x << c) | x >> (32 - c)
-}
-
-
-//!!! THE ERROR IS IN HERE, HANDLES "Negative" NUMBERS INCORRECTLY !!!
-// THE NUMBERS ARE NOT REALLY NEGATIVE, THEY JUST HAVE A 1 in POSITION 31 
-function limitedAdd(a, b) {
-   if(a < 0) {
-      console.log("ERRORSSSA")
-      console.log(a)
-      console.log(setBit(a, 31, 0))
-      //a *= -1
-   }
-   if(b < 0) {
-      console.log("ERRORSSSB")
-      console.log(b.toString(2))
-      console.log((b * -1).toString(2))
-      //b *= -1
-   }
-   return ((a + b) & 0xFFFFFFFF)
-}
-
-function limitedAdd___(a, b) {
-   let result = 0
-   let carry = 0
-   for(let i = 0; i < 32; i++) {
-      let bita = getBit(a, i)
-      let bitb = getBit(b, i)
-      let temp = carry + bita + bitb
-      if(temp === 1 || temp === 3){
-         result += 2**i
-      }
-      if(temp > 1) {
-         carry = 1
-      }
-      if(temp < 2) {
-         carry = 0 
-      }
-   }
-   return result 
-}
-
-function limitedAdd__(a, b) {
-   let result = a + b
-   let resultString = result.toString(2)
-   let len = resultString.length
-   if (len > 32) {
-      let newResult = 0
-      for(let i = 0; i < 32; i++) {
-         newResult = newResult << 1
-         if(resultString[len -32 + i] === "1"){
-            newResult += 1
-         }
-      }
-      return newResult
-   }
-   else {
-      return result
-   }
-}
+}*/
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
