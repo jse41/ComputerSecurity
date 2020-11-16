@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "big-integer": "^1.6.48",
     "bootstrap": "^4.5.3",
+    "lodash": "^4.17.20",
     "react": "^16.14.0",
     "react-bootstrap": "^1.3.0",
     "react-dom": "^16.14.0",

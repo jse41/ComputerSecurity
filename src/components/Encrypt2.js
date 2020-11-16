@@ -47,18 +47,18 @@ class Encrypt2 extends React.Component {
    }
 
 
-   makeInversePermutationTable(permutationTable) { 
+   makeInversePermutationTable(permutationTable) {
       let inverseTable = [];
       let idx = 0;
-      for (let i = 0; i < permutationTable.length; i++)  {     
-         for (let j = 0; j < permutationTable.length; j++) { 
-            if (permutationTable[j] == i + 1)  { 
+      for (let i = 0; i < permutationTable.length; i++)  {
+         for (let j = 0; j < permutationTable.length; j++) {
+            if (permutationTable[j] == i + 1)  {
                inverseTable[idx] = [j+1];
                idx++;
-               break; 
-            } 
-         } 
-      } 
+               break;
+            }
+         }
+      }
       return inverseTable;
    }
 
@@ -102,7 +102,7 @@ class Encrypt2 extends React.Component {
          right = bitHandling.circularLeftShift(right, 28, shifts);
 
          const newKey = bitHandling.permutate(bitHandling.fromHalves(left, right, 28), PC2);
-         
+
          keys.push(newKey);
       }
 
@@ -115,7 +115,7 @@ class Encrypt2 extends React.Component {
          paddedMessage += " ";
       }
       return paddedMessage;
-      
+
    }
 
    xorBlock({inputA , inputB, N_BITS}){
@@ -149,15 +149,15 @@ class Encrypt2 extends React.Component {
    }
 
    string2bin(message){
-      let bin = ""; 
+      let bin = "";
       for (let i = 0; i < message.length; i++) {
-         bin += message.charCodeAt(i).toString(2).padStart(16,"0"); 
+         bin += message.charCodeAt(i).toString(2).padStart(16,"0");
       }
       return bin;
    }
 
    bin2string(bin){
-      let message = ""; 
+      let message = "";
       for (let i = 0; i < bin.length; i = i+16) {
          message += String.fromCharCode(parseInt(bin.substring(i, i+16),2));
       }
@@ -165,7 +165,7 @@ class Encrypt2 extends React.Component {
    }
 
    hex2bin(hex){
-      let bin = ""; 
+      let bin = "";
       for (let i = 0; i < hex.length; i=i+4) {
          bin += parseInt(hex.substring(i, i+4),16).toString(2).padStart(16,"0");
       }
@@ -173,7 +173,7 @@ class Encrypt2 extends React.Component {
    }
 
    bin2hex(bin){
-      let hex = ""; 
+      let hex = "";
       for (let i = 0; i < bin.length; i = i+16) {
          hex += parseInt(bin.substring(i, i+16),2).toString(16).padStart(4,"0");
       }
@@ -195,23 +195,23 @@ class Encrypt2 extends React.Component {
 
          // XOR with subkey i
          const xorWithKey = this.xorBlock({
-            inputA: parseInt(expandedR0, 2), 
+            inputA: parseInt(expandedR0, 2),
             inputB: keys[i],
-            N_BITS: expandedR0.length});         
+            N_BITS: expandedR0.length});
 
          // S-boxes to shrink from 48 to 32 bits
          const sBoxBlock = this.sBoxBlock({
-            bits: xorWithKey, 
-            sBoxes: sBoxes});         
-         
+            bits: xorWithKey,
+            sBoxes: sBoxes});
+
          // Permutation
          const permutatedBlock = this.permutate(sBoxBlock, P);
 
          // XOR with left side
          const xorWithLeft = this.xorBlock({
-            inputA: parseInt(permutatedBlock, 2), 
+            inputA: parseInt(permutatedBlock, 2),
             inputB: parseInt(L, 2),
-            N_BITS: 32});       
+            N_BITS: 32});
 
          // Assign to new right side
          L = R;
@@ -232,12 +232,12 @@ class Encrypt2 extends React.Component {
          let messageBlock = message.substring(blockNum, blockNum+N_BITS);
          message = message.substring(blockNum+N_BITS);
 
-         // Initial Permutation 
+         // Initial Permutation
          const initialPermutation = this.permutate(messageBlock, IP);
 
          // 16 DES Rounds
          const afterDESRounds = this.DESRounds({
-            input: initialPermutation, 
+            input: initialPermutation,
             keys: keys,
             sBoxes: sBoxes,
             P: P
@@ -245,7 +245,7 @@ class Encrypt2 extends React.Component {
          console.log(`--------------------`);
 
          const test = this.DESRounds({
-            input: afterDESRounds, 
+            input: afterDESRounds,
             keys: keys.reverse(),
             sBoxes: sBoxes,
             P: P
@@ -272,6 +272,8 @@ class Encrypt2 extends React.Component {
          binaryKey = bitHandling.joinPieces(binaryKey, this.state.key.charCodeAt(i), 16);
       }
 
+      console.log(bitHandling.bitString(binaryKey, 64));
+
       const keys = this.generateKeys({
          originalKey: binaryKey,
          PC1: this.makePermutationTable(64, 56),
@@ -283,7 +285,7 @@ class Encrypt2 extends React.Component {
       const paddedMessage = this.addPadding(this.state.plaintext);
 
       // Generate the binary message
-      const binaryMessage = this.string2bin(paddedMessage); 
+      const binaryMessage = this.string2bin(paddedMessage);
 
       console.log(`Original Message: ${this.bin2hex(binaryMessage)}`);
 
@@ -300,7 +302,7 @@ class Encrypt2 extends React.Component {
          IP: IP,
          P: P,
          FP: FP
-      }); 
+      });
 
       // Convert encrypted number to characters for the encrypted message
       let encryptedMessage = this.bin2hex(encryptedBinary)
@@ -312,7 +314,7 @@ class Encrypt2 extends React.Component {
 
       // Decrypt the encrypted message (temporarily placement in this method to check if it works)
       // Generate the binary message
-      const encryptedBinaryMessage = this.hex2bin(encryptedMessage); 
+      const encryptedBinaryMessage = this.hex2bin(encryptedMessage);
 
       // Generate encrypted message
       const decryptedNumber = this.encryptBlock({
@@ -322,7 +324,7 @@ class Encrypt2 extends React.Component {
          IP: IP,
          P: P,
          FP: FP
-      }); 
+      });
 
       // Convert encrypted number to characters for the encrypted message
       let dencryptedMessage = this.bin2hex(decryptedNumber)
@@ -331,8 +333,8 @@ class Encrypt2 extends React.Component {
       this.setState({
          decryptedCiphertext: dencryptedMessage
       })
-      
-      
+
+
    }
 
    doDecryption() {
