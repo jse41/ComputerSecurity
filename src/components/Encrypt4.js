@@ -2,169 +2,177 @@ import React from 'react';
 import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
-import {circularLeftShift, getBit, setBit} from './../bit-handling';
 
-function md5(message) {
-   let binaryVis = getBinaryVisual(message)
-   let binary = getBinary(message)
-   let result = makeMD5(binary)
-   console.log("result")
-   console.log(result)
-   return binaryVis
-}
+// The cycle for actual bit manipulation 
+function md5cycle(x, k) {
+   // The initial variables of the rotates 
+   var a = x[0], b = x[1], c = x[2], d = x[3];
 
-function getBinaryVisual(input) {
-   let output = ""
-   for (var i = 0; i < input.length; i++) {
-      let value = input[i].charCodeAt(0).toString(2)
-      if(value.length < 8)
-         output += "0"
-      output += value + " ";
-   }
-   return output
-}
-
-function getBinary(input) {
-   if (input.length === 0) {
-      let output = [] 
-      output.push(0b10000000000000000000000000000000)
-      for (let i = 0; i < 15; i++) {
-         output.push(0b00000000)
-      }
-      return output
-   }
-   let totalLength = input.length * 8
-   let numBlocks = Math.ceil(totalLength / 512)
-   let output = [] 
-   for (let i = 0; i < numBlocks * 16; i++) {
-      output.push(0b00000000)
-   }
-   let index
-   for (index = 0; index < input.length; index++) {
-      let value = input[index].charCodeAt(0)
-      output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << 8
-      output[Math.floor(index / 4)] = output[Math.floor(index / 4)] | value
-   }
-   if (index >= numBlocks * 16 * 4) {
-      return output
-   }
-   else { 
-      if (index % 4 === 0) {
-         let value = 0b00000001
-         output[(index / 4)] = value
-         output[(index / 4)] = output[Math.floor(index / 4)] << 31
-      }
-      else{
-         output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << 1
-         let value = 0b00000001
-         output[Math.floor(index / 4)] = output[Math.floor(index / 4)] | value
-         output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << 7
-         output[Math.floor(index / 4)] = output[Math.floor(index / 4)] << ((3 - (index % 4)) * 8)
-      }
-      return output
-   }
-}
-
-function getDefaults() {
-   let K = []
-   for (let i = 0; i < 64; i++) {
-      K.push(Math.floor(2 ** 32 * Math.abs(Math.sin(i + 1))))
-   }
-   return K
-}
-
-function makeMD5(messageBlocks) {
+   // The rotation amounts specialized to md5 
    let rotate_amounts = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
       5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
       4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
       6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
-
+   
+   // Generate the unique sine based values to be factored in 
    let K = getDefaults()
-   let a0 = 0x67452301   // A
-   let b0 = 0xefcdab89   // B
-   let c0 = 0x98badcfe   // C
-   let d0 = 0x10325476   // D
 
-   for (let block = 0; block < Math.floor(messageBlocks.length / 16); block++) {
-      let A = a0
-      let B = b0
-      let C = c0
-      let D = d0 
-      for (let i = 0; i < 64; i++) {
-         let F = 0
-         let g = 0
-         if (i < 16) {
-            F = (B & C) | ((~B) & D)
-            g = i
-         }
-         else if (i >= 16 && i < 32) {
-            F = (D & B) | ((~D) & C)
-            g = (5 * i + 1) % 16
-         }
-         else if (i >= 32 && i < 48) {
-            F = B ^ C ^ D
-            g = (3 * i + 5) % 16
-         }
-         else if (i >= 48) {
-            F = C ^ (B | (~D))
-            g = (7 * i) % 16
-         }
-         F = limitedAdd(limitedAdd(F, A), limitedAdd(K[i], messageBlocks[16 * block + g]))
-         A = D
-         D = C
-         C = B
-         B = limitedAdd(B, circularLeftShift(F, 32, rotate_amounts[i]))
+   // The actual looping of md5 
+   for (let index = 0; index < 64; index++) {
+      // F stores the newly computed value 
+      let F = 0x00000000
+      let g = 0
+      if (index < 16) {
+         g = index
+         F = ff(a, b, c, d, k[g], rotate_amounts[index], K[index]);
       }
-      a0 = limitedAdd(a0, A)
-      b0 = limitedAdd(b0, B)
-      c0 = limitedAdd(c0, C)
-      d0 = limitedAdd(d0, D)
+      else if (index >= 16 && index < 32) {
+         g = (5 * index + 1) % 16
+         F = gg(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 32 && index < 48) {
+         g = (3 * index + 5) % 16
+         F = hh(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 48) {
+         g = (7 * index) % 16
+         F = ii(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      // actually rotate them
+      a = d
+      d = c
+      c = b
+      b = F 
    }
-   return [a0.toString(2), b0.toString(2), c0.toString(2), d0.toString(2)]
+
+   // Make sure the addition always take place in 32 bit space 
+   x[0] = add32(a, x[0]);
+   x[1] = add32(b, x[1]);
+   x[2] = add32(c, x[2]);
+   x[3] = add32(d, x[3]);
+
+   // Return happens since the values in x are returned 
 }
 
-function limitedAdd(a, b) {
-   return ((a + b) & 0xFFFFFFFF)
+// This does the addditions and rotations of the bots 
+function collect(q, a, b, x, s, t) {
+   a = add32(add32(a, q), add32(x, t));
+   /// The right shift is to make it a circular shift 
+   return add32((a << s) | (a >>> (32 - s)), b);
 }
 
-function limitedAdd___(a, b) {
-   let result = 0
-   let carry = 0
-   for(let i = 0; i < 32; i++) {
-      let bita = getBit(a, i)
-      let bitb = getBit(b, i)
-      let temp = carry + bita + bitb
-      if(temp === 1 || temp === 3){
-         result += 2**i
-      }
-      if(temp > 1) {
-         carry = 1
-      }
-      if(temp < 2) {
-         carry = 0 
-      }
-   }
-   return result 
+// These are the functions defined by MD5
+function ff(a, b, c, d, x, s, t) {
+   return collect((b & c) | ((~b) & d), a, b, x, s, t);
 }
 
-function limitedAdd__(a, b) {
-   let result = a + b
-   let resultString = result.toString(2)
-   let len = resultString.length
-   if (len > 32) {
-      let newResult = 0
-      for(let i = 0; i < 32; i++) {
-         newResult = newResult << 1
-         if(resultString[len -32 + i] === "1"){
-            newResult += 1
-         }
-      }
-      return newResult
-   }
-   else {
-      return result
-   }
+function gg(a, b, c, d, x, s, t) {
+   return collect((b & d) | (c & (~d)), a, b, x, s, t);
 }
+
+function hh(a, b, c, d, x, s, t) {
+   return collect(b ^ c ^ d, a, b, x, s, t);
+}
+
+function ii(a, b, c, d, x, s, t) {
+   return collect(c ^ (b | (~d)), a, b, x, s, t);
+}
+
+// The quickes way to make sure the result is in 32 bit space 
+function add32(a, b) {
+   return (a + b) & 0xFFFFFFFF
+}
+
+// MD5 function to gernerate some seed numbers 
+function getDefaults() {
+   let K = []
+   for (let i = 0; i < 64; i++) {
+      K.push(Math.floor((2 ** 32) * Math.abs(Math.sin(i + 1))))
+   }
+   return K
+}
+
+function makeMD5(s) {
+   var n = s.length
+   let i
+
+   // Defined by MD5 
+   let initials = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
+   var hash = initials 
+   
+   // Loop over the string in 512 bit increments to build the resulting string 
+   //     64 characters at 8 bits a character is 512 
+   for (i = 64; i <= s.length; i += 64) {
+      let block = md5block(s.substring(i - 64, i))
+      md5cycle(hash, block);
+   }
+
+   // isolate the final string 
+   s = s.substring(i - 64);
+
+   // The last block 
+   var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+   // Build the block with the characters in the approapriate form 
+   //     Lower bits come first 
+   for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+
+   // Set the leading 1 bit of the buffer 
+   tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+
+   // If the string took up too much space, make another block essentially 
+   if (i > 55) {
+      md5cycle(hash, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
+   }
+
+   // describe the size of size of the entire messag which goes on the end 
+   tail[14] = (n * 8) % 512;
+
+   // Hash the last block 
+   md5cycle(hash, tail);
+
+   // hash has always been holding the result, so now return it 
+   return hash;
+}
+
+// Make the md5 blocks 
+function md5block(s) {
+   // store the set of blocks as the result, must be 512 "bits" in response 
+   let md5blocks = [];
+   for (let i = 0; i < 64; i += 4) {
+      // Store first charater in the lowest of the bits 
+      md5blocks[i >> 2] = s.charCodeAt(i)
+         + (s.charCodeAt(i + 1) << 8)
+         + (s.charCodeAt(i + 2) << 16)
+         + (s.charCodeAt(i + 3) << 24);
+   }
+   return md5blocks;
+}
+
+// Actually print it in a readable HEX format
+function makeHex(n) {
+   let hex_chr = '0123456789ABCDEF'.split('');
+   let s = '';
+   for (let index = 0; index < 4; index++)
+      s += hex_chr[(n >> (index * 8 + 4)) & 0x0F]
+         + hex_chr[(n >> (index * 8)) & 0x0F];
+   return s;
+}
+
+// Loop over to join all the appropriate hex values together 
+function hex(x) {
+   for (var i = 0; i < x.length; i++)
+      x[i] = makeHex(x[i]);
+   return x.join('');
+}
+
+// Calls all that is needed to return the text output of MD5 
+function md5(message) {
+   return hex(makeMD5(message));
+}
+
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
