@@ -131,7 +131,7 @@ class Encrypt2 extends React.Component {
       return hex;
    }
 
-   DESRounds({input, keys, sBoxes, P}){
+   DESRounds({input, keys, sBoxes, P, P2 }){
       // Does the 16 rounds of DES for a 64 bit block
       let [L, R] = bitHandling.makeHalves(input);
       console.log(`Before DES: ${L}  ${R}`)
@@ -140,8 +140,7 @@ class Encrypt2 extends React.Component {
       for (let i = 0; i < 16; i++){
 
          // Expand right size from 32 to 48 bits
-         const expansionPermutation = bitHandling.makePermutationTable(32, 48);
-         const expandedR0 = bitHandling.permutate(R, expansionPermutation);
+         const expandedR0 = bitHandling.permutate(R, P2);
 
          // XOR with subkey i
          const xorWithKey = bitHandling.XOR(expandedR0, keys[i]);
@@ -167,7 +166,7 @@ class Encrypt2 extends React.Component {
       return L + R;
    }
 
-   encryptBlock({originalBinary, keys, sBoxes, IP, P, FP}){
+   encryptBlock({originalBinary, keys, sBoxes, IP, P, P2, FP}){
       // Encrypts each 64 bit block
       const N_BITS = 64;
       let message = originalBinary;
@@ -182,23 +181,20 @@ class Encrypt2 extends React.Component {
             input: initialPermutation,
             keys: keys,
             sBoxes: sBoxes,
-            P: P
+            P: P,
+            P2,
          });
          console.log(`--------------------`);
 
          const test = this.DESRounds({
             input: afterDESRounds,
             keys: keys.reverse(),
-            sBoxes: sBoxes,
-            P: P
+            sBoxes,
+            P,
+            P2,
          });
 
-         // Reverse left and right sides
-         const reversedBlock = afterDESRounds.substring(N_BITS/2) + afterDESRounds.substring(0, N_BITS/2);
-
-         // Final Permutation
-         const finalPermutation = bitHandling.permutate(reversedBlock, FP);
-
+         const finalPermutation = bitHandling.permutate(bitHandling.swapHalves(afterDESRounds), FP);
          output += finalPermutation;
       }
 
@@ -227,16 +223,18 @@ class Encrypt2 extends React.Component {
       const sBoxes = this.makeSBoxes();
       const IP =  bitHandling.makePermutationTable(64, 64);
       const P = bitHandling.makePermutationTable(54, 64);
+      const P2 = bitHandling.makePermutationTable(32, 48);
       const FP = bitHandling.invertPermutationTable(IP);
 
       // Generate encrypted message
       const encryptedBinary = this.encryptBlock({
          originalBinary: binaryMessage,
-         keys: keys,
-         sBoxes: sBoxes,
-         IP: IP,
-         P: P,
-         FP: FP
+         keys,
+         sBoxes,
+         IP,
+         P,
+         P2,
+         FP,
       });
 
       // Convert encrypted number to characters for the encrypted message
@@ -247,34 +245,46 @@ class Encrypt2 extends React.Component {
          encryptedPlaintext: encryptedMessage
       })
 
-      // Decrypt the encrypted message (temporarily placement in this method to check if it works)
-      // Generate the binary message
-      const encryptedBinaryMessage = this.hex2bin(encryptedMessage);
-
-      // Generate encrypted message
-      const decryptedNumber = this.encryptBlock({
-         originalBinary: encryptedBinary,
-         keys: keys.reverse(),
-         sBoxes: sBoxes,
-         IP: IP,
-         P: P,
-         FP: FP
+      this.doDecryption({
+         cipherbits: encryptedBinary,
+         keys,
+         sBoxes,
+         IP,
+         P,
+         P2,
+         FP,
       });
-
-      // Convert encrypted number to characters for the encrypted message
-      let dencryptedMessage = this.bin2hex(decryptedNumber)
-      console.log(`Decrypted Message: ${dencryptedMessage}`);
-
-      this.setState({
-         decryptedCiphertext: dencryptedMessage
-      })
-
+      //
+      // // Convert encrypted number to characters for the encrypted message
+      // let dencryptedMessage = this.bin2hex(decryptedNumber)
+      // console.log(`Decrypted Message: ${dencryptedMessage}`);
+      //
+      // this.setState({
+      //    decryptedCiphertext: dencryptedMessage
+      // })
+      //
 
    }
 
-   doDecryption() {
+   doDecryption({ cipherbits, keys, IP, FP, P, P2, sBoxes }) {
+      const preFinal = bitHandling.permutate(cipherbits, IP);
+      const swapped = bitHandling.swapHalves(preFinal);
+      const preDecryption = bitHandling.permutate(swapped, FP);
 
+      const decryptedBinary = this.encryptBlock({
+         originalBinary: preDecryption,
+         keys: keys.reverse(),
+         sBoxes,
+         IP,
+         P,
+         P2,
+         FP,
+      });
 
+      const decryptedMessage = bitHandling.bitsToStr(decryptedBinary);
+      this.setState({
+         decryptedCiphertext: decryptedMessage,
+      })
    }
 
    render() {

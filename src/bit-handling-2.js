@@ -131,6 +131,11 @@ function makeHalves(bits) {
     return [bits.substring(0, length), bits.substring(length)];
 }
 
+function swapHalves(bits) {
+    const [R, L] = makeHalves(bits);
+    return fromHalves(L, R);
+}
+
 function joinPieces(left, right) {
     return left + right;
 }
@@ -187,6 +192,7 @@ module.exports = {
     circularLeftShift,
     permutate,
     makeHalves,
+    swapHalves,
     joinPieces,
     fromHalves,
     makePermutationTable,
