@@ -1,9 +1,10 @@
+import _ from 'lodash';
 import React from 'react';
 import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button'
-import bitHandling from '../bit-handling';
+import bitHandling from '../bit-handling-2';
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
@@ -15,8 +16,8 @@ class Encrypt2 extends React.Component {
 
       this.state = {
          isToggleOn: true,
-         plaintext: "",
-         key: "",
+         plaintext: "Hello world!",
+         key: "xcdf",
          encryptedPlaintext: "",
          ciphertext: "",
          decryptedCiphertext: ""
@@ -28,38 +29,6 @@ class Encrypt2 extends React.Component {
 
    handleUpdate(prop, e) {
       this.setState({ [prop]: e.target.value });
-   }
-
-   makePermutationTable(originalSize, tableSize) {
-      const options = [];
-      for (let i = 0;i < originalSize;i++) {
-         options.push(i);
-      }
-
-      const table = [];
-
-      for (let i = 0;i < tableSize;i++) {
-         const randomIndex = Math.floor(Math.random() * options.length);
-         table.push(options.splice(randomIndex, 1));
-      }
-
-      return table;
-   }
-
-
-   makeInversePermutationTable(permutationTable) {
-      let inverseTable = [];
-      let idx = 0;
-      for (let i = 0; i < permutationTable.length; i++)  {
-         for (let j = 0; j < permutationTable.length; j++) {
-            if (permutationTable[j] == i + 1)  {
-               inverseTable[idx] = [j+1];
-               idx++;
-               break;
-            }
-         }
-      }
-      return inverseTable;
    }
 
    makeSBoxes() {
@@ -94,15 +63,14 @@ class Encrypt2 extends React.Component {
 
       const keys = [];
       const initialPermutation = bitHandling.permutate(originalKey, PC1);
-      let [left, right] = bitHandling.makeHalves(initialPermutation, 56);
+      let [left, right] = bitHandling.makeHalves(initialPermutation);
 
       for (let round = 0;round < N_ROUNDS;round++) {
          const shifts = NUM_LHS[round];
-         left = bitHandling.circularLeftShift(left, 28, shifts);
-         right = bitHandling.circularLeftShift(right, 28, shifts);
+         left = bitHandling.circularLeftShift(left, shifts);
+         right = bitHandling.circularLeftShift(right, shifts);
 
-         const newKey = bitHandling.permutate(bitHandling.fromHalves(left, right, 28), PC2);
-
+         const newKey = bitHandling.permutate(bitHandling.fromHalves(left, right), PC2);
          keys.push(newKey);
       }
 
@@ -117,23 +85,6 @@ class Encrypt2 extends React.Component {
       return paddedMessage;
 
    }
-
-   xorBlock({inputA , inputB, N_BITS}){
-      let xorOutput = "";
-      for (let i = 0; i < N_BITS; i++){
-         xorOutput = bitHandling.setBit(xorOutput, i, bitHandling.getBit(inputA, i) ^ bitHandling.getBit(inputB, i));
-      }
-
-      return bitHandling.bitString(xorOutput, N_BITS);
-   }
-
-   permutate(bits, table) {
-      let output = "";
-      for (let i = 0; i < table.length; i++) {
-          output += bits.charAt(table[i]);
-      }
-      return output;
-  }
 
    sBoxBlock({bits, sBoxes}){
       let output = "";
@@ -182,36 +133,30 @@ class Encrypt2 extends React.Component {
 
    DESRounds({input, keys, sBoxes, P}){
       // Does the 16 rounds of DES for a 64 bit block
-      let L = input.substring(0, 32);
-      let R = input.substring(32);
+      let [L, R] = bitHandling.makeHalves(input);
       console.log(`Before DES: ${L}  ${R}`)
 
       // Performs 16 rounds of DES
       for (let i = 0; i < 16; i++){
 
          // Expand right size from 32 to 48 bits
-         const expansionPermutation = this.makePermutationTable(32, 48);
-         const expandedR0 = this.permutate(R, expansionPermutation);
+         const expansionPermutation = bitHandling.makePermutationTable(32, 48);
+         const expandedR0 = bitHandling.permutate(R, expansionPermutation);
 
          // XOR with subkey i
-         const xorWithKey = this.xorBlock({
-            inputA: parseInt(expandedR0, 2),
-            inputB: keys[i],
-            N_BITS: expandedR0.length});
+         const xorWithKey = bitHandling.XOR(expandedR0, keys[i]);
 
          // S-boxes to shrink from 48 to 32 bits
          const sBoxBlock = this.sBoxBlock({
             bits: xorWithKey,
-            sBoxes: sBoxes});
+            sBoxes,
+         });
 
          // Permutation
-         const permutatedBlock = this.permutate(sBoxBlock, P);
+         const permutatedBlock = bitHandling.permutate(sBoxBlock, P);
 
          // XOR with left side
-         const xorWithLeft = this.xorBlock({
-            inputA: parseInt(permutatedBlock, 2),
-            inputB: parseInt(L, 2),
-            N_BITS: 32});
+         const xorWithLeft = bitHandling.XOR(permutatedBlock, L);
 
          // Assign to new right side
          L = R;
@@ -228,12 +173,9 @@ class Encrypt2 extends React.Component {
       let message = originalBinary;
 
       let output = "";
-      for (let blockNum = 0; blockNum < originalBinary.length/N_BITS; blockNum++){
-         let messageBlock = message.substring(blockNum, blockNum+N_BITS);
-         message = message.substring(blockNum+N_BITS);
 
-         // Initial Permutation
-         const initialPermutation = this.permutate(messageBlock, IP);
+      for (let block of _.chunk(originalBinary, N_BITS).map(b => b.join(''))) {
+         const initialPermutation = bitHandling.permutate(block, IP);
 
          // 16 DES Rounds
          const afterDESRounds = this.DESRounds({
@@ -255,7 +197,7 @@ class Encrypt2 extends React.Component {
          const reversedBlock = afterDESRounds.substring(N_BITS/2) + afterDESRounds.substring(0, N_BITS/2);
 
          // Final Permutation
-         const finalPermutation = this.permutate(reversedBlock, FP);
+         const finalPermutation = bitHandling.permutate(reversedBlock, FP);
 
          output += finalPermutation;
       }
@@ -266,33 +208,26 @@ class Encrypt2 extends React.Component {
    doEncryption() {
 
       // Generate the key
-      let binaryKey = 0;
-
-      for (let i = 0; i < Math.min(this.state.key.length, 4); i++) {
-         binaryKey = bitHandling.joinPieces(binaryKey, this.state.key.charCodeAt(i), 16);
-      }
-
-      console.log(bitHandling.bitString(binaryKey, 64));
+      let binaryKey = bitHandling.strToBits(this.state.key.substring(0, 4));;
 
       const keys = this.generateKeys({
          originalKey: binaryKey,
-         PC1: this.makePermutationTable(64, 56),
-         PC2: this.makePermutationTable(64, 56),
+         PC1: bitHandling.makePermutationTable(64, 56),
+         PC2: bitHandling.makePermutationTable(56, 48),
       });
-
 
       // Padding the plaintext message so that the message is composed of 64 bit sections (4 characters sections)
       const paddedMessage = this.addPadding(this.state.plaintext);
 
       // Generate the binary message
-      const binaryMessage = this.string2bin(paddedMessage);
+      const binaryMessage = bitHandling.strToBits(paddedMessage);
 
       console.log(`Original Message: ${this.bin2hex(binaryMessage)}`);
 
       const sBoxes = this.makeSBoxes();
-      const IP =  this.makePermutationTable(64, 64);
-      const P = this.makePermutationTable(64, 64);
-      const FP = this.makeInversePermutationTable(IP);
+      const IP =  bitHandling.makePermutationTable(64, 64);
+      const P = bitHandling.makePermutationTable(54, 64);
+      const FP = bitHandling.invertPermutationTable(IP);
 
       // Generate encrypted message
       const encryptedBinary = this.encryptBlock({
@@ -318,7 +253,7 @@ class Encrypt2 extends React.Component {
 
       // Generate encrypted message
       const decryptedNumber = this.encryptBlock({
-         originalBinary: encryptedBinaryMessage,
+         originalBinary: encryptedBinary,
          keys: keys.reverse(),
          sBoxes: sBoxes,
          IP: IP,
