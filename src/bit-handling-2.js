@@ -9,7 +9,7 @@ const { bitString } = require('./bit-handling');
 function strToBits(str) {
     let bits = '';
     for (let i = 0;i < str.length;i++) {
-        bits += bitString(str.charCodeAt(i), 16);
+        bits += bitString(str.charCodeAt(i), 16).padStart(16, '0');
     }
     return bits;
 }
@@ -123,7 +123,7 @@ function circularLeftShift(original, amount) {
  * @return {string} The permuted result
  */
 function permutate(bits, table) {
-    return table.reverse().map(i => getBit(bits, i)).join('');
+    return table.map(i => getBit(bits, bits.length - i - 1)).join('');
 }
 
 function makeHalves(bits) {
@@ -137,6 +137,42 @@ function joinPieces(left, right) {
 
 function fromHalves(left, right) {
     return joinPieces(left, right);
+}
+
+function makePermutationTable(originalSize, permutedSize) {
+    const options = [];
+    const extraOptions = [];
+    for (let i = 0;i < originalSize;i++) options.push(i);
+
+    if (permutedSize > originalSize) {
+        for (let i = 0;i < permutedSize - originalSize;i++) {
+            extraOptions.push(options[Math.floor(Math.random() * options.length)]);
+        }
+
+        options.push(...extraOptions);
+    }
+
+    const table = [];
+    for (let i = 0;i < permutedSize;i++) {
+        const randomIndex = Math.floor(Math.random() * options.length);
+        table.push(options.splice(randomIndex, 1)[0]);
+    }
+
+    return table;
+}
+
+// Not sure this works
+function invertPermutationTable(table) {
+    const ignore = new Set();
+    const inverted = [];
+
+    for (let i = 0;i < table.length;i++) {
+        if (ignore.has(table[i])) continue;
+        ignore.add(table[i]);
+        inverted[table[i]] = i;
+    }
+
+    return inverted;
 }
 
 module.exports = {
@@ -153,4 +189,6 @@ module.exports = {
     makeHalves,
     joinPieces,
     fromHalves,
+    makePermutationTable,
+    invertPermutationTable,
 };

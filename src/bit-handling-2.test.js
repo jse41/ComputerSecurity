@@ -62,11 +62,11 @@ it('circularLeftShift', () => {
 })
 
 it('permutate', () => {
-    const original = '010001000';
-    const result_1 = '000110000';
-    const result_2 = '100000';
+    const original = '123456789';
+    const result_1 = '214365879';
+    const result_2 = '153264';
 
-    const table_1 = [0, 1, 2, 4, 7, 3, 5, 6, 8];
+    const table_1 = [1, 0, 3, 2, 5, 4, 7, 6, 8];
     const table_2 = [0, 4, 2, 1, 5, 3];
 
     expect(bitHandling2.permutate(original, table_1)).toEqual(result_1);
@@ -76,4 +76,18 @@ it('permutate', () => {
 it('makeHalves', () => {
     const original = '0010011111';
     expect(bitHandling2.makeHalves(original)).toEqual(expect.arrayContaining(['00100', '11111']));
+})
+
+it('makePermutationTable', () => {
+    const table = bitHandling2.makePermutationTable(10, 10);
+    expect(table).toEqual(expect.arrayContaining([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
+})
+
+it('invertPermutationTable', () => {
+    const p = bitHandling2.makePermutationTable(10, 14);
+    expect(p).toEqual(expect.arrayContaining([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
+    const i = bitHandling2.invertPermutationTable(p);
+    const bits = '0123456789';
+    expect(bitHandling2.permutate(bits, p)).toEqual(p.join(''));
+    expect(bitHandling2.permutate(bitHandling2.permutate(bits, p), i)).toEqual(bits);
 })
