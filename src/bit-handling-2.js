@@ -1,6 +1,11 @@
 const _ = require('lodash');
 const { bitString } = require('./bit-handling');
 
+/**
+ * Converts a string of text to a string of bits
+ * @param {string} str Any text
+ * @return {string} The charCodes of the characters in base 2
+ */
 function strToBits(str) {
     let bits = '';
     for (let i = 0;i < str.length;i++) {
@@ -9,16 +14,34 @@ function strToBits(str) {
     return bits;
 }
 
+/**
+ * Converts a string of bits back to text
+ * @param {string} bits Char codes
+ * @return {string} The text string corresponding to those character codes
+ */
 function bitsToStr(bits) {
     const charCodes = _.chunk(bits.split(''), 16).map(chunks => chunks.join(''));
     return String.fromCharCode(...charCodes.map(code => parseInt(code, 2)));
 }
 
+/**
+ * Gets the value of the bit at the specified index
+ * @param {string} binary The binary string representation
+ * @param {number} index The index of the bit to get (zero is rightmost bit)
+ * @returns {number} The value of the specified bit
+ */
 function getBit(binary, index) {
     const i = binary.length - index - 1;
     return parseInt(binary.charAt(i));
 }
 
+/**
+ * Set the value of the bit at the specified index to `value`
+ * @param {string} original The original bit string
+ * @param {number} index The index of the bit to set (zero is rightmost)
+ * @param {number} value The value to set the bit to
+ * @returns {string} The new bitstring, with the appropriate bit set
+ */
 function setBit(original, index, value) {
     const i = original.length - index - 1;
     return `${original.substring(0, i)}${value}${original.substring(i + 1)}`;
@@ -79,12 +102,41 @@ function leftShift(original, amount) {
     return original + '0'.repeat(amount);
 }
 
+/**
+ * Perform a circular left shift on a binary number
+ * @param {string} original The original bitstring
+ * @param {number} amount The number of left shifts
+ * @return {string} The shifted bitstring
+ */
 function circularLeftShift(original, amount) {
     if (amount < 0) throw new Error('amount must be non-negative');
     amount = amount % original.length;
     if (amount === 0) return original;
 
     return original.substring(amount) + original.substring(0, amount);
+}
+
+/**
+ * Apply a permutation to a binary string, and return the result
+ * @param {string} bits The original bits
+ * @param {number[]} table The permutation table
+ * @return {string} The permuted result
+ */
+function permutate(bits, table) {
+    return table.reverse().map(i => getBit(bits, i)).join('');
+}
+
+function makeHalves(bits) {
+    const length = Math.round(bits.length / 2);
+    return [bits.substring(0, length), bits.substring(length)];
+}
+
+function joinPieces(left, right) {
+    return left + right;
+}
+
+function fromHalves(left, right) {
+    return joinPieces(left, right);
 }
 
 module.exports = {
@@ -97,4 +149,8 @@ module.exports = {
     XOR,
     leftShift,
     circularLeftShift,
+    permutate,
+    makeHalves,
+    joinPieces,
+    fromHalves,
 };

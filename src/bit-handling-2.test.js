@@ -60,3 +60,20 @@ it('circularLeftShift', () => {
     expect(bitHandling2.circularLeftShift(original, 5)).toEqual(after5);
     expect(bitHandling2.circularLeftShift(original, 8)).toEqual(after8);
 })
+
+it('permutate', () => {
+    const original = '010001000';
+    const result_1 = '000110000';
+    const result_2 = '100000';
+
+    const table_1 = [0, 1, 2, 4, 7, 3, 5, 6, 8];
+    const table_2 = [0, 4, 2, 1, 5, 3];
+
+    expect(bitHandling2.permutate(original, table_1)).toEqual(result_1);
+    expect(bitHandling2.permutate(original, table_2)).toEqual(result_2);
+})
+
+it('makeHalves', () => {
+    const original = '0010011111';
+    expect(bitHandling2.makeHalves(original)).toEqual(expect.arrayContaining(['00100', '11111']));
+})
