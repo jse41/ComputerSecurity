@@ -4,6 +4,7 @@ import Alert from './Alert'
 import Nav from './Nav'
 import {Form} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button'
+import Collapsible from 'react-collapsible';
 import bitHandling from '../bit-handling-2';
 
 /**
@@ -20,7 +21,24 @@ class Encrypt2 extends React.Component {
          key: "xcdf",
          encryptedPlaintext: "",
          ciphertext: "",
-         decryptedCiphertext: ""
+         decryptedCiphertext: "",
+         setValues: true,
+         keys: [],
+         first64BitBlock: "",
+         first64Bits: "",
+         IP: [],
+         afterInitialPermutation: "",
+         L0: "",
+         R0: "",
+         expansionBox: [],
+         afterExpansionBox: "",
+         afterXorWithKey: "",
+         sBox: [],
+         afterSBox: "",
+         permutationBox: [],
+         afterPermutation: "",
+         L1: "",
+         R1: ""
       }
 
       this.handleUpdate = this.handleUpdate.bind(this);
@@ -44,16 +62,6 @@ class Encrypt2 extends React.Component {
       sBoxes[6] = [4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1,13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6,1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2,6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12];
       sBoxes[7] = [13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7,1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2,7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8,2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11];
 
-      /*
-      // For the 8 S boxes
-      for (let i = 0; i < 8; i++) {
-         sBoxes[i] = []
-         // For the 64 elements in each S box
-         for (let j = 0; j < 64; j++) {
-            sBoxes[i].push(Math.floor(Math.random() * 16));
-         }
-      }
-      */
       return sBoxes;
    }
 
@@ -83,13 +91,11 @@ class Encrypt2 extends React.Component {
          paddedMessage += " ";
       }
       return paddedMessage;
-
    }
 
    sBoxBlock({bits, sBoxes}){
       let output = "";
       for (let i = 0; i < 8; i++){
-         const box = sBoxes[i];
          const section = bits.substring(i, i+6);
          const row = parseInt(section.charAt(0) + section.charAt(5), 2);
          const col = parseInt(section.substring(1,5), 2);
@@ -99,42 +105,11 @@ class Encrypt2 extends React.Component {
       return output;
    }
 
-   string2bin(message){
-      let bin = "";
-      for (let i = 0; i < message.length; i++) {
-         bin += message.charCodeAt(i).toString(2).padStart(16,"0");
-      }
-      return bin;
-   }
-
-   bin2string(bin){
-      let message = "";
-      for (let i = 0; i < bin.length; i = i+16) {
-         message += String.fromCharCode(parseInt(bin.substring(i, i+16),2));
-      }
-      return message;
-   }
-
-   hex2bin(hex){
-      let bin = "";
-      for (let i = 0; i < hex.length; i=i+4) {
-         bin += parseInt(hex.substring(i, i+4),16).toString(2).padStart(16,"0");
-      }
-      return bin;
-   }
-
-   bin2hex(bin){
-      let hex = "";
-      for (let i = 0; i < bin.length; i = i+16) {
-         hex += parseInt(bin.substring(i, i+16),2).toString(16).padStart(4,"0");
-      }
-      return hex;
-   }
-
    DESRounds({input, keys, sBoxes, P, P2 }){
       // Does the 16 rounds of DES for a 64 bit block
       let [L, R] = bitHandling.makeHalves(input);
       console.log(`Before DES: ${L}  ${R}`)
+      let firstRound = true;
 
       // Performs 16 rounds of DES
       for (let i = 0; i < 16; i++){
@@ -156,6 +131,23 @@ class Encrypt2 extends React.Component {
 
          // XOR with left side
          const xorWithLeft = bitHandling.XOR(permutatedBlock, L);
+         
+         if (this.state.setValues && firstRound){
+            this.setState({
+               L0: L,
+               R0: R,
+               expansionBox: P2,
+               afterExpansionBox: expandedR0,
+               afterXorWithKey: xorWithKey,
+               sBox: sBoxes[0],
+               afterSBox: sBoxBlock,
+               permutationBox: P,
+               afterPermutation: permutatedBlock,
+               L1: R,
+               R1: xorWithLeft
+            })
+         }
+         firstRound = false;
 
          // Assign to new right side
          L = R;
@@ -169,9 +161,8 @@ class Encrypt2 extends React.Component {
    encryptBlock({originalBinary, keys, sBoxes, IP, P, P2, FP}){
       // Encrypts each 64 bit block
       const N_BITS = 64;
-      let message = originalBinary;
-
       let output = "";
+      let firstRound = true;
 
       for (let block of _.chunk(originalBinary, N_BITS).map(b => b.join(''))) {
          const initialPermutation = bitHandling.permutate(block, IP);
@@ -194,14 +185,25 @@ class Encrypt2 extends React.Component {
             P2,
          });
 
-         const finalPermutation = bitHandling.permutate(bitHandling.swapHalves(afterDESRounds), FP);
+         const finalPermutation = bitHandling.permutate(afterDESRounds, FP);
          output += finalPermutation;
+
+         if (this.state.setValues && firstRound){
+            this.setState({
+               first64Bits: block,
+               afterInitialPermutation: initialPermutation
+            })
+         }
+         firstRound = false;
       }
 
       return output;
    }
 
    doEncryption() {
+      this.setState({
+         setValues: true
+      })
 
       // Generate the key
       let binaryKey = bitHandling.strToBits(this.state.key.substring(0, 4));;
@@ -218,11 +220,11 @@ class Encrypt2 extends React.Component {
       // Generate the binary message
       const binaryMessage = bitHandling.strToBits(paddedMessage);
 
-      console.log(`Original Message: ${this.bin2hex(binaryMessage)}`);
+      console.log(`Original Message: ${this.bitsToHex(binaryMessage)}`);
 
       const sBoxes = this.makeSBoxes();
       const IP =  bitHandling.makePermutationTable(64, 64);
-      const P = bitHandling.makePermutationTable(54, 64);
+      const P = bitHandling.makePermutationTable(32, 32);
       const P2 = bitHandling.makePermutationTable(32, 48);
       const FP = bitHandling.invertPermutationTable(IP);
 
@@ -238,11 +240,15 @@ class Encrypt2 extends React.Component {
       });
 
       // Convert encrypted number to characters for the encrypted message
-      let encryptedMessage = this.bin2hex(encryptedBinary)
+      let encryptedMessage = this.bitsToHex(encryptedBinary)
       console.log(`Encrypted Message: ${encryptedMessage}`);
 
       this.setState({
-         encryptedPlaintext: encryptedMessage
+         encryptedPlaintext: encryptedMessage,
+         setValues: false,
+         keys: keys,
+         first64BitBlock: paddedMessage.substring(0,4),
+         IP: IP,
       })
 
       this.doDecryption({
@@ -256,11 +262,10 @@ class Encrypt2 extends React.Component {
       });
       //
       // // Convert encrypted number to characters for the encrypted message
-      // let dencryptedMessage = this.bin2hex(decryptedNumber)
-      // console.log(`Decrypted Message: ${dencryptedMessage}`);
+      // let decryptedMessage = bitHandling.bitsToHex(decryptedNumber)
       //
       // this.setState({
-      //    decryptedCiphertext: dencryptedMessage
+      //    decryptedCiphertext: decryptedMessage
       // })
       //
 
@@ -281,11 +286,29 @@ class Encrypt2 extends React.Component {
          FP,
       });
 
-      const decryptedMessage = bitHandling.bitsToStr(decryptedBinary);
+      const decryptedMessage = this.bitsToHex(decryptedBinary);
+      console.log(`Decrypted Message: ${decryptedMessage}`);
       this.setState({
          decryptedCiphertext: decryptedMessage,
       })
    }
+
+hexToBits(hex){
+   let bits = "";
+   for (let i = 0; i < hex.length; i=i+4) {
+      bits += parseInt(hex.substring(i, i+4),16).toString(2).padStart(16,"0");
+   }
+   return bits;
+}
+
+bitsToHex(bits){
+   let hex = "";
+   for (let i = 0; i < bits.length; i = i+16) {
+      hex += parseInt(bits.substring(i, i+16),2).toString(16).padStart(4,"0");
+   }
+   return hex;
+}
+
 
    render() {
       return (
@@ -312,6 +335,43 @@ class Encrypt2 extends React.Component {
                Encrypt
             </Button>
             </Form>
+            <br></br>
+            <h3>Key Generation</h3>
+            <p>Key 1: {this.state.keys[0]}</p>
+            <p>Key 2: {this.state.keys[1]}</p>
+            <br></br>
+            <h3>Encryption</h3>
+            <p>Original Message: {this.state.plaintext}</p>
+            <p>First 64 Bits of Message: {this.state.first64BitBlock}</p>
+            <p>Bits of First Block: {this.state.first64Bits}</p>
+            <br></br>
+            <h5>Initial Permutation</h5>
+            <p>Permutation Table: {this.state.IP}</p>
+            <p>Permutation is the act of mapping with input bit to a new output position. In this permutation, the input is 64 bits and the output is 64 bits, no bits
+                     are lost or created, instead each and every bit is mapped to a single new location. For example, since the first entry in the permutation table is 
+                     {this.state.IP[0]}, the bit at that index in the input becomes the first bit of the output.</p>
+            <p>After Permutating: {this.state.afterInitialPermutation}</p>
+            <h5>DES Rounds</h5>
+            <p>L0: {this.state.L0}</p>
+            <p>R0: {this.state.R0}</p>
+            <p>Insert latex equation</p>
+            <Collapsible trigger="f Function">
+               <p>Overview of f function</p>
+               <p>Expansion Box: {this.state.expansionBox}</p>
+               <p>After Expansion: {this.state.afterExpansionBox}</p>
+               <p>XOR with the key:</p>
+               <p>Key: {this.state.keys[0]}</p>
+               <p>After XOR: {this.state.afterXorWithKey}</p>
+               <Collapsible trigger="S Boxes">
+                  <p>First 6 bits of input: {this.state.afterXorWithKey.substring(0,6)}</p>
+                  <p>Row (formed with the first and last bit of the input): {this.state.afterXorWithKey.charAt(0)+ this.state.afterXorWithKey.charAt(5)}</p>
+                  <p>Column (formed with the middle 4 bits of the input): {this.state.afterXorWithKey.substring(1,5)}</p>
+                  <p>Using the row and column calculated above, the corresponding table entry at that location is the new output.</p>
+               </Collapsible>
+               <p>After Permutation: {this.state.afterPermutation}</p>
+            </Collapsible>
+            <br></br>
+            <hr></hr>
             <br></br>
             <p>Your encrypted message:</p>
             <p>{this.state.encryptedPlaintext}</p>
