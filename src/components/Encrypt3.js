@@ -68,11 +68,11 @@ function rsa_decrypt(message, d, N) {
   return text;
 }
 
-console.log('A Big Hedgehog');
-console.log(ascii_encrypt('A Big Hedgehog'));
-console.log(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127));
-console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127), 2631, 3127));
-console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('A Big Hedgehog'), 47, 3127), 2631, 3127)));
+console.log('I aint never seen 2 pretty best friends');
+console.log(ascii_encrypt('I aint never seen 2 pretty best friends'));
+console.log(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127));
+console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127));
+console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127)));
 
 function gcd(a, b) {
   if ((typeof a !== 'number') || (typeof a !== 'number')) 
@@ -105,7 +105,7 @@ function isPrime(val) {
 
 function isValid_e(e, p, q) {
   if (e == 0 || p == 0 || q == 0){
-    return ''
+    return '';
   }
 
   var N = calc_n(p, q);
@@ -121,9 +121,28 @@ function isValid_e(e, p, q) {
   }
 }
 
+function generate_e(p, q) {
+  if (p == 0 || q == 0){
+    return '';
+  }
+  var N = calc_n(p, q);
+  var phi = calc_phi_n(p, q);
+  var res = "";
+  var i;
+
+  for (i = 2; i < phi; i++) {
+    if (gcd(i, N) > 1 || gcd(i, phi) > 1) {
+      continue
+    } else {
+      res += i.toString() + ", ";
+    }
+  }
+  return res
+}
+
 function isValid_d(d, e, p, q) {
   if (d == 0 || e == 0 || p == 0 || q == 0){
-    return ''
+    return '';
   }
 
   var phi = calc_phi_n(p, q);
@@ -133,6 +152,28 @@ function isValid_d(d, e, p, q) {
   } else {
     return 'Invalid value';
   }
+}
+
+function generate_d(e, p, q) {
+  if (e == 0 || p == 0 || q == 0) {
+    return '';
+  }
+
+  var phi = calc_phi_n(p, q);
+  var res = "";
+  var i;
+
+  for (i = 1; i < phi; i++) {
+    var mod = (i*e) % phi;
+
+    if (mod === 1) {
+      res += i.toString() + ", ";
+    } else {
+      continue;
+    }
+  }
+
+  return res;
 }
 
 const Encrypt3 = () => {
@@ -245,6 +286,7 @@ const Encrypt3 = () => {
                 <Form.Control type='number' placeholder='enter e' value={e} onChange={event => setE(event.target.value)} />
               </Form.Group>
               <p>{isValid_e(e, p, q)}</p>
+              <p>Suggestions: {generate_e(p, q)}</p>
             </div>
           </ListGroup.Item>
 
@@ -275,7 +317,7 @@ const Encrypt3 = () => {
                 <Form.Control type='number' placeholder='enter d' value={d} onChange={event => setD(event.target.value)} />
               </Form.Group>
               <p>{isValid_d(d, e, p, q)}</p>
-
+              <p>Suggestions: {generate_d(e, p, q)}</p>
             </div>
           </ListGroup.Item>
 
