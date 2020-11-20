@@ -123,7 +123,9 @@ function circularLeftShift(original, amount) {
  * @return {string} The permuted result
  */
 function permutate(bits, table) {
-    return table.map(i => getBit(bits, bits.length - i - 1)).join('');
+    return table.map(i =>
+        getBit(bits, bits.length - i - 1))
+        .join('');
 }
 
 function makeHalves(bits) {
