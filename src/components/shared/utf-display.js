@@ -16,7 +16,7 @@ const UTFDisplay = ({ ascii, columns }) => {
             <table>
                 <tbody>
                     {rows.map((cells, r) => (
-                        <React.Fragment>
+                        <React.Fragment key={r}>
                             <tr key={`${r}a`}>
                                 {cells.map(({ letter }, c) => (
                                     <td key={c}>
