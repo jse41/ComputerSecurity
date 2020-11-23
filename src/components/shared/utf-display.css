@@ -1,0 +1,24 @@
+table.utf-display {}
+
+table.utf-display tr {}
+
+table.utf-display tr td {
+    text-align: center;
+    border: solid 1px #ccc;
+    padding: 1em;
+}
+
+table.utf-display > tr:first-child > td:first-child {
+    border-top-left-radius: 3px;
+}
+
+table.utf-display tr td h1 {
+    padding: 0;
+    margin: 0;
+}
+
+table.utf-display tr td .label {
+    font-style: italic;
+    color: #969696;
+    font-size: 0.8rem;
+}
