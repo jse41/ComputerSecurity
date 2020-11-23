@@ -1,7 +1,5 @@
 import _ from 'lodash';
 import React from 'react';
-import Alert from '../components/Alert'
-import Nav from '../components/Nav'
 import {Form} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button'
 import Collapsible from 'react-collapsible';
@@ -10,6 +8,8 @@ import {DESRounds} from '../components/DES';
 import BinaryDisplay from "../components/shared/binary-display";
 import PermutationTable from "../components/shared/permutation-table";
 import Page from "../components/shared/page";
+import UTFDisplay from "../components/shared/utf-display";
+import Latex from 'react-latex';
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
@@ -217,7 +217,7 @@ class DesPage extends React.Component {
     render() {
         return (
             <Page title="DES">
-                <div style={{ textAlign: 'left' }}>
+                <div style={{textAlign: 'left'}}>
                     <Form>
                         <Form.Group controlId="EncryptUpdate">
                             <Form.Label>Message</Form.Label>
@@ -230,66 +230,99 @@ class DesPage extends React.Component {
                         </Form.Group>
                         <Form.Group controlId="KeyControl">
                             <Form.Label>Key</Form.Label>
-                            <Form.Control type="text" value={this.state.key} onChange={this.handleUpdate.bind(this, 'key')}
+                            <Form.Control type="text" value={this.state.key}
+                                          onChange={this.handleUpdate.bind(this, 'key')}
                                           placeholder="Key to Use"/>
                             <Form.Text className="text-muted">
                                 The key to use (any string of 4 characters)
                             </Form.Text>
                         </Form.Group>
-                        <div style={{ textAlign: 'center' }}>
+                        <div style={{textAlign: 'center'}}>
                             <Button variant="primary" onClick={this.doEncryption}>
                                 Encrypt
                             </Button>
                         </div>
                     </Form>
                     <br/>
-                    <h3>Key Generation</h3>
-                    <p>Key 1: {this.state.keys[0]}</p>
-                    <p>Key 2: {this.state.keys[1]}</p>
-                    <br/>
-                    <h3>Encryption</h3>
-                    <p>Original Message: {this.state.plaintext}</p>
-                    <p>First 64 Bits of Message: {this.state.first64BitBlock}</p>
-                    <p>Bits of First Block: {this.state.first64Bits}</p>
-                    <br/>
-                    <h5>Initial Permutation</h5>
-                    <p>Permutation Table: {this.state.IP}</p>
-                    <p>Permutation is the act of mapping with input bit to a new output position. In this permutation, the
-                        input is 64 bits and the output is 64 bits, no bits
-                        are lost or created, instead each and every bit is mapped to a single new location. For example,
-                        since the first entry in the permutation table is
-                        {this.state.IP[0]}, the bit at that index in the input becomes the first bit of the output.</p>
-                    <p>After Permuting: {this.state.afterInitialPermutation}</p>
-                    <h5>DES Rounds</h5>
-                    <p>L0: {this.state.L0}</p>
-                    <p>R0: {this.state.R0}</p>
-                    <p>Insert latex equation</p>
-                    <Collapsible trigger="f Function">
-                        <p>Overview of f function</p>
-                        <p>Expansion Box: {this.state.expansionBox}</p>
-                        <p>After Expansion: {this.state.afterExpansionBox}</p>
-                        <p>XOR with the key:</p>
-                        <p>Key: {this.state.keys[0]}</p>
-                        <p>After XOR: {this.state.afterXorWithKey}</p>
-                        <Collapsible trigger="S Boxes">
-                            <p>First 6 bits of input: {this.state.afterXorWithKey.substring(0, 6)}</p>
-                            <p>Row (formed with the first and last bit of the
-                                input): {this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}</p>
-                            <p>Column (formed with the middle 4 bits of the
-                                input): {this.state.afterXorWithKey.substring(1, 5)}</p>
-                            <p>Using the row and column calculated above, the corresponding table entry at that location is
-                                the new output.</p>
+                    <div className="section">
+                        <h1>Key Generation</h1>
+                        <p>DES uses a 64-bit key to encrypt the plaintext message. This 64-bit key is used to generate
+                            16
+                            distinct 48-bit keys, which are used in series to encrypt the message.</p>
+                    </div>
+                    <div className="section">
+                        <h3>Key Input</h3>
+                        <p>A 4-character string can be used as the 64-bit key because each character can be converted to
+                            a 16-bit UTF-16 character code. The key you provided is converted to a 64-bit binary value
+                            as shown below</p>
+                        <br/>
+                        <div style={{textAlign: 'center'}}>
+                            <UTFDisplay ascii={this.state.key.substring(0, 4)}/>
+                        </div>
+                        <br/>
+                        <BinaryDisplay label="Your key" bits={bitHandling.strToBits(this.state.key.substring(0, 4))}/>
+                    </div>
+                    <div className="section">
+                        <h3>Key Generation</h3>
+                        {this.state.keys.map((key, n) => (
+                            <BinaryDisplay
+                                label={`$K_{${n + 1}}$`}
+                                bits={key}
+                            />
+                        ))}
+                    </div>
+                    <div className="section">
+                        <h3>Encryption</h3>
+                        <p>Original Message: {this.state.plaintext}</p>
+                        <p>First 64 Bits of Message: {this.state.first64BitBlock}</p>
+                        <p>Bits of First Block: {this.state.first64Bits}</p>
+                    </div>
+                    <div className="section">
+                        <h5>Initial Permutation</h5>
+                        <p>Permutation Table: {this.state.IP}</p>
+                        <p>Permutation is the act of mapping with input bit to a new output position. In this
+                            permutation, the
+                            input is 64 bits and the output is 64 bits, no bits
+                            are lost or created, instead each and every bit is mapped to a single new location. For
+                            example,
+                            since the first entry in the permutation table is
+                            {this.state.IP[0]}, the bit at that index in the input becomes the first bit of the
+                            output.</p>
+                        <p>After Permuting: {this.state.afterInitialPermutation}</p>
+                    </div>
+                    <div className="section">
+                        <h5>DES Rounds</h5>
+                        <p>L0: {this.state.L0}</p>
+                        <p>R0: {this.state.R0}</p>
+                        <p>Insert latex equation</p>
+                        <Collapsible trigger="f Function">
+                            <p>Overview of f function</p>
+                            <p>Expansion Box: {this.state.expansionBox}</p>
+                            <p>After Expansion: {this.state.afterExpansionBox}</p>
+                            <p>XOR with the key:</p>
+                            <p>Key: {this.state.keys[0]}</p>
+                            <p>After XOR: {this.state.afterXorWithKey}</p>
+                            <Collapsible trigger="S Boxes">
+                                <p>First 6 bits of input: {this.state.afterXorWithKey.substring(0, 6)}</p>
+                                <p>Row (formed with the first and last bit of the
+                                    input): {this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}</p>
+                                <p>Column (formed with the middle 4 bits of the
+                                    input): {this.state.afterXorWithKey.substring(1, 5)}</p>
+                                <p>Using the row and column calculated above, the corresponding table entry at that
+                                    location is
+                                    the new output.</p>
+                            </Collapsible>
+                            <p>After Permutation: {this.state.afterPermutation}</p>
                         </Collapsible>
-                        <p>After Permutation: {this.state.afterPermutation}</p>
-                    </Collapsible>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <p>Your encrypted message:</p>
-                    <p>{this.state.encryptedPlaintext}</p>
-                    <br/>
-                    <p>The decrypted message:</p>
-                    <p>{this.state.decryptedCiphertext}</p>
+                    </div>
+                    <div className="section">
+                        <h1>Results</h1>
+                        <p>Your encrypted message:</p>
+                        <p>{this.state.encryptedPlaintext}</p>
+                        <br/>
+                        <p>The decrypted message:</p>
+                        <p>{this.state.decryptedCiphertext}</p>
+                    </div>
                 </div>
             </Page>
         )
