@@ -10,24 +10,26 @@ const UTFDisplay = ({ ascii }) => {
     const bitCodes = _.chunk(bitHandling.strToBits(ascii).split(''), 16).map(bits => bits.join(''));
 
     return (
-        <table className="utf-display">
-            <tr>
-                {letters.map(letter => (
-                    <td>
-                        <h1>{letter}</h1>
-                    </td>
-                ))}
-            </tr>
-            <tr>
-                {bitCodes.map(code => (
-                    <td>
-                        <div style={{ fontFamily: 'monospace' }}>
-                            {code}
-                        </div>
-                    </td>
-                ))}
-            </tr>
-        </table>
+        <div className="utf-display">
+            <table>
+                <tr>
+                    {letters.map(letter => (
+                        <td>
+                            <h1>{letter}</h1>
+                        </td>
+                    ))}
+                </tr>
+                <tr>
+                    {bitCodes.map(code => (
+                        <td>
+                            <div style={{ fontFamily: 'monospace' }}>
+                                {code}
+                            </div>
+                        </td>
+                    ))}
+                </tr>
+            </table>
+        </div>
     )
 }
 

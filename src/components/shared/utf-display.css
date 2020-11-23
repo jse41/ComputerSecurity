@@ -1,24 +1,32 @@
-table.utf-display {}
+.utf-display {
+    display: inline-block;
+    border-radius: 3px;
+    border: solid 1px #ccc;
+}
 
-table.utf-display tr {}
-
-table.utf-display tr td {
+.utf-display > table tr > td {
     text-align: center;
     border: solid 1px #ccc;
-    padding: 1em;
+    padding: 0.5em;
 }
 
-table.utf-display > tr:first-child > td:first-child {
-    border-top-left-radius: 3px;
+.utf-display > table > tr:first-child > td {
+    border-top: none;
 }
 
-table.utf-display tr td h1 {
+.utf-display > table > tr > td:first-child {
+    border-left: none;
+}
+
+.utf-display > table > tr > td:last-child {
+    border-right: none;
+}
+
+.utf-display > table > tr:last-child > td {
+    border-bottom: none;
+}
+
+.utf-display > table > tr > td h1 {
     padding: 0;
     margin: 0;
-}
-
-table.utf-display tr td .label {
-    font-style: italic;
-    color: #969696;
-    font-size: 0.8rem;
 }
