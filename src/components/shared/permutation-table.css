@@ -1,0 +1,37 @@
+.permutation-table {
+    display: inline-block;
+    border-radius: 3px;
+    border: solid 1px #ccc;
+}
+
+.permutation-table tr > td, .permutation-table tr > th {
+    text-align: center;
+    border: solid 1px #ccc;
+}
+
+.permutation-table tr > td {
+    padding: 1em;
+}
+
+.permutation-table tr > td > .index {
+    float: left;
+    color: #aaa;
+    font-size: 0.8rem;
+    margin: -4px 8px 8px -4px;
+}
+
+.permutation-table tr:first-child > * {
+    border-top: none;
+}
+
+.permutation-table tr > *:first-child {
+    border-left: none;
+}
+
+.permutation-table tr > *:last-child {
+    border-right: none;
+}
+
+.permutation-table tr:last-child > * {
+    border-bottom: none;
+}

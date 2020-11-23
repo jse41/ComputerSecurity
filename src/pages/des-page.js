@@ -258,12 +258,13 @@ class DesPage extends React.Component {
                         <br/>
                         <div style={{textAlign: 'center'}}>
                             <UTFDisplay ascii={this.state.key.substring(0, 4)}/>
+                            <br/>
+                            <br/>
+                            <BinaryDisplay label="Your key" bits={bitHandling.strToBits(this.state.key.substring(0, 4))}/>
                         </div>
-                        <br/>
-                        <BinaryDisplay label="Your key" bits={bitHandling.strToBits(this.state.key.substring(0, 4))}/>
                     </div>
                     <div className="section">
-                        <h3>Key Generation</h3>
+                        <h3>Generated Keys</h3>
                         {this.state.keys.map((key, n) => (
                             <BinaryDisplay
                                 label={`$K_{${n + 1}}$`}
@@ -272,13 +273,21 @@ class DesPage extends React.Component {
                         ))}
                     </div>
                     <div className="section">
-                        <h3>Encryption</h3>
-                        <p>Original Message: {this.state.plaintext}</p>
-                        <p>First 64 Bits of Message: {this.state.first64BitBlock}</p>
-                        <p>Bits of First Block: {this.state.first64Bits}</p>
+                        <h1>Encryption</h1>
+                        <p>DES encrypts a message by separating it into 64-bit pieces, and encrypting them one-by-one. For
+                            a simple string, this means the message will be encrypted in blocks of four characters</p>
+                        <p>The first block of your message is converted to bits as follows</p>
+                        <br/>
+                        <div style={{textAlign: 'center'}}>
+                            <UTFDisplay ascii={this.state.first64BitBlock}/>
+                            <br/>
+                            <br/>
+                            <BinaryDisplay label="Binary" bits={this.state.first64Bits}/>
+                        </div>
                     </div>
                     <div className="section">
                         <h5>Initial Permutation</h5>
+                        <PermutationTable table={this.state.IP} columns={8}/>
                         <p>Permutation Table: {this.state.IP}</p>
                         <p>Permutation is the act of mapping with input bit to a new output position. In this
                             permutation, the
