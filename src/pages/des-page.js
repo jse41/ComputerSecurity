@@ -242,16 +242,16 @@ class DesPage extends React.Component {
                             </Button>
                         </div>
                     </Form>
-                    <br></br>
+                    <br/>
                     <h3>Key Generation</h3>
                     <p>Key 1: {this.state.keys[0]}</p>
                     <p>Key 2: {this.state.keys[1]}</p>
-                    <br></br>
+                    <br/>
                     <h3>Encryption</h3>
                     <p>Original Message: {this.state.plaintext}</p>
                     <p>First 64 Bits of Message: {this.state.first64BitBlock}</p>
                     <p>Bits of First Block: {this.state.first64Bits}</p>
-                    <br></br>
+                    <br/>
                     <h5>Initial Permutation</h5>
                     <p>Permutation Table: {this.state.IP}</p>
                     <p>Permutation is the act of mapping with input bit to a new output position. In this permutation, the
@@ -259,7 +259,7 @@ class DesPage extends React.Component {
                         are lost or created, instead each and every bit is mapped to a single new location. For example,
                         since the first entry in the permutation table is
                         {this.state.IP[0]}, the bit at that index in the input becomes the first bit of the output.</p>
-                    <p>After Permutating: {this.state.afterInitialPermutation}</p>
+                    <p>After Permuting: {this.state.afterInitialPermutation}</p>
                     <h5>DES Rounds</h5>
                     <p>L0: {this.state.L0}</p>
                     <p>R0: {this.state.R0}</p>
@@ -282,17 +282,14 @@ class DesPage extends React.Component {
                         </Collapsible>
                         <p>After Permutation: {this.state.afterPermutation}</p>
                     </Collapsible>
-                    <br></br>
-                    <hr></hr>
-                    <br></br>
+                    <br/>
+                    <br/>
+                    <br/>
                     <p>Your encrypted message:</p>
                     <p>{this.state.encryptedPlaintext}</p>
-                    <br></br>
+                    <br/>
                     <p>The decrypted message:</p>
                     <p>{this.state.decryptedCiphertext}</p>
-                    <br></br>
-                    <br></br>
-                    <br></br>
                 </div>
             </Page>
         )
