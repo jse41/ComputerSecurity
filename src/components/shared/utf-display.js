@@ -4,30 +4,39 @@ import PropTypes from 'prop-types';
 import bitHandling from "../../bit-handling-2";
 import './utf-display.css';
 
-const UTFDisplay = ({ ascii }) => {
+const UTFDisplay = ({ ascii, columns }) => {
+    if (!columns) columns = ascii.length;
     const letters = ascii.split('');
-    const charCodes = letters.map(s => s.charCodeAt(0));
     const bitCodes = _.chunk(bitHandling.strToBits(ascii).split(''), 16).map(bits => bits.join(''));
+    const cells = _.zip(letters, bitCodes).map(([letter, bits]) => ({ letter, bits }));
+    const rows = _.chunk(cells, columns);
 
     return (
         <div className="utf-display">
             <table>
-                <tr>
-                    {letters.map(letter => (
-                        <td>
-                            <h1>{letter}</h1>
-                        </td>
+                <tbody>
+                    {rows.map((cells, r) => (
+                        <React.Fragment>
+                            <tr key={`${r}a`}>
+                                {cells.map(({ letter }, c) => (
+                                    <td key={c}>
+                                        <div className="index">{(r * columns) + c + 1}</div>
+                                        <h1>{letter}</h1>
+                                    </td>
+                                ))}
+                            </tr>
+                            <tr key={`${r}b`}>
+                                {cells.map(({ bits }, c) => (
+                                    <td className="bits" key={c}>
+                                        <div style={{ fontFamily: 'monospace' }}>
+                                            {bits}
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        </React.Fragment>
                     ))}
-                </tr>
-                <tr>
-                    {bitCodes.map(code => (
-                        <td>
-                            <div style={{ fontFamily: 'monospace' }}>
-                                {code}
-                            </div>
-                        </td>
-                    ))}
-                </tr>
+                </tbody>
             </table>
         </div>
     )
@@ -35,6 +44,7 @@ const UTFDisplay = ({ ascii }) => {
 
 UTFDisplay.propTypes = {
     ascii: PropTypes.string,
+    columns: PropTypes.number,
 };
 
 export default UTFDisplay;
