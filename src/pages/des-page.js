@@ -14,7 +14,7 @@ import Page from "../components/shared/page";
 /**
  * About Page Wrapper, relies on React Router for routing to here
  */
-class Encrypt2 extends React.Component {
+class DesPage extends React.Component {
 
     constructor(props) {
         super(props);
@@ -295,4 +295,4 @@ class Encrypt2 extends React.Component {
     }
 }
 
-export default Encrypt2;
+export default DesPage;

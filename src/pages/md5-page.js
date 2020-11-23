@@ -178,7 +178,7 @@ function md5(message) {
 /**
  * About Page Wrapper, relies on React Router for routing to here
  */
-class Encrypt4 extends React.Component {
+class Md5Page extends React.Component {
    constructor(props) {
       super(props);
       this.state = {
@@ -216,4 +216,4 @@ class Encrypt4 extends React.Component {
       )
    }
 }
-export default Encrypt4;
+export default Md5Page;

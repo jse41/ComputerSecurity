@@ -2,7 +2,7 @@ import React from 'react';
 import Page from "../components/shared/page";
 import {Form} from 'react-bootstrap';
 
-class Encrypt1 extends React.Component {
+class VigenerePage extends React.Component {
 
    constructor(props) {
       super(props);
@@ -152,4 +152,4 @@ class Encrypt1 extends React.Component {
       )
    }
 }
-export default Encrypt1;
+export default VigenerePage;

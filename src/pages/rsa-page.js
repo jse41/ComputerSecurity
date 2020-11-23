@@ -178,7 +178,7 @@ function generate_d(e, p, q) {
     return res;
 }
 
-const Encrypt3 = () => {
+const RsaPage = () => {
 
     // keeps track of p and q values and uses set function in inputs
     const [p, setP] = useState('');
@@ -390,4 +390,4 @@ const Encrypt3 = () => {
         </Page>
     );
 };
-export default Encrypt3;
+export default RsaPage;
