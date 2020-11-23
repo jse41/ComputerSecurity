@@ -4,11 +4,11 @@ import Alertprac from "../Alert";
 import Nav from "../Nav";
 
 // Generic page wrapper
-const Page = ({ title, children }) => (
-    <div>
+const Page = ({ title, children, contentStyle, ...rest }) => (
+    <div {...rest}>
         <Alertprac />
         <Nav />
-        <div className="container" style={{ marginTop: 60, marginBottom: 120 }}>
+        <div className="container" style={{ marginTop: 60, marginBottom: 120, ...contentStyle }}>
             <h1>{title}</h1>
             {children}
         </div>
@@ -18,6 +18,7 @@ const Page = ({ title, children }) => (
 Page.propTypes = {
     title: PropTypes.string,
     children: PropTypes.node,
+    contentStyle: PropTypes.object,
 };
 
 export default Page;
