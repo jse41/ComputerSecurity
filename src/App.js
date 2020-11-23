@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import './App.css';
-import Home from './components/Home'
-import About from './components/About'
-import Encrypt1 from './components/Encrypt1'
-import Encrypt2 from './components/Encrypt2'
-import Encrypt3 from './components/Encrypt3'
-import Encrypt4 from './components/Encrypt4'
+import Home from './pages/Home'
+import About from './pages/About'
+import Encrypt1 from './pages/Encrypt1'
+import Encrypt2 from './pages/Encrypt2'
+import Encrypt3 from './pages/Encrypt3'
+import Encrypt4 from './pages/Encrypt4'
 
 class App extends Component {
   constructor(props) {
@@ -20,7 +20,7 @@ class App extends Component {
   updateMe = (info) => {
     this.setState(info)
   }
-  
+
   render() {
     return (
       <div className="App">
