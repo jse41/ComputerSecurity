@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Page from "../components/shared/page";
-import logo from '../logo.svg'
 
 class Home extends Component {
     render() {

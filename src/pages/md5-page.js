@@ -1,9 +1,8 @@
 import React from 'react';
-import Alert from '../components/Alert'
-import Nav from '../components/Nav'
-import {Form} from 'react-bootstrap';
+import {Form, Button} from 'react-bootstrap';
 import Page from "../components/shared/page";
-import { result } from 'lodash';
+//import bitsToStr from "../bit-handling-2";
+//import { result } from 'lodash';
 
 // The cycle for actual bit manipulation
 function md5cycle(x, k) {
@@ -174,9 +173,9 @@ function hex(x) {
 
 // Calls all that is needed to return the text output of MD5
 function md5(message) {
-   console.log(makeDisplayBlock(message))
    return hex(makeMD5(message));
 }
+
 
 function makeDisplayBlock(s) {
    let n = s.length
@@ -219,27 +218,149 @@ function makeDisplayBlock(s) {
    return(result)
 } 
 
+function makePretty(arr) {
+   let result = ""; 
+   for (let outer = 0; outer < arr.length; outer++) {
+      for(let index = 0; index < arr[outer].length; index++) {
+         //result += bitsToStr(arr[outer][index])
+         result += (arr[outer][index]).toString(2)
+         result += ", "
+      }
+   }
+   return result
+}
+
+// The cycle for actual bit manipulation
+function* md5cycleIterations(x, k) {
+   // The initial variables of the rotates
+   var a = x[0], b = x[1], c = x[2], d = x[3];
+
+   // The rotation amounts specialized to md5
+   let rotate_amounts = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21]
+
+   // Generate the unique sine based values to be factored in
+   let K = getDefaults()
+
+   // The actual looping of md5
+   for (let index = 0; index < 64; index++) {
+      // F stores the newly computed value
+      let F = 0x00000000
+      let g = 0
+      if (index < 16) {
+         g = index
+         F = ff(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 16 && index < 32) {
+         g = (5 * index + 1) % 16
+         F = gg(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 32 && index < 48) {
+         g = (3 * index + 5) % 16
+         F = hh(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      else if (index >= 48) {
+         g = (7 * index) % 16
+         F = ii(a, b, c, d, k[g], rotate_amounts[index], K[index]);
+      }
+      // actually rotate them
+      a = d
+      d = c
+      c = b
+      b = F
+      let iterum = {'a': a, 'b': b, 'c': c, 'd': d}
+      yield(iterum)
+   }
+
+   // Make sure the addition always take place in 32 bit space
+   x[0] = add32(a, x[0]);
+   x[1] = add32(b, x[1]);
+   x[2] = add32(c, x[2]);
+   x[3] = add32(d, x[3]);
+
+   // Return happens since the values in x are returned
+}
+
+var curHash = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
  */
 class Md5Page extends React.Component {
+
    constructor(props) {
       super(props);
+      let blocks = makeDisplayBlock("")
       this.state = {
          isToggleOn: true,
          message: "",
-         result: "",
+         result: md5(""),
          cipher: "",
-         clear: ""
+         clear: "",
+         aCur: hex([curHash[0]]),
+         bCur: hex([curHash[1]]),
+         cCur: hex([curHash[2]]),
+         dCur: hex([curHash[3]]),
+         iterator: md5cycleIterations(curHash, blocks[0]), 
+         iteration: 0,
+         encoded: makePretty(blocks),
+         warning: "", 
       };
+
       this.handleFormUpdate = this.handleFormUpdate.bind(this);
+      this.handleClick = this.handleClick.bind(this)
    }
 
    handleFormUpdate(e) {
       if(e.target.id === "EncryptUpdate") {
-         this.setState({message: e.target.value});
-         this.setState({result: md5(e.target.value, this.state.key)})
+         let input = e.target.value
+         let blocks = makeDisplayBlock(input)
+         let initials = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
+         this.setState({
+            message: input,
+            result: md5(input),
+            encoded: blocks,
+            aCur: hex([initials[0]]),
+            bCur: hex([initials[1]]),
+            cCur: hex([initials[2]]),
+            dCur: hex([initials[3]]),
+            iterator: md5cycleIterations(curHash, blocks[0]),
+            iteration: 0,
+            warning: "", 
+         })
+      }
+   }
+
+   handleClick(e) {
+      let result = this.state.iterator.next().value
+      if (result) {
+         console.log(result)
+         this.setState({
+            aCur: hex([result['a']]),
+            bCur: hex([result['b']]),
+            cCur: hex([result['c']]),
+            dCur: hex([result['d']]),
+         }) 
+      }
+      else {
+         this.setState({
+            aCur: hex([curHash[0]]),
+            bCur: hex([curHash[1]]),
+            cCur: hex([curHash[2]]),
+            dCur: hex([curHash[3]]),
+         })
+         let nextIter = this.state.iteration + 1
+         if (nextIter < this.state.encoded.length) {
+            this.setState({
+               iterator: md5cycleIterations(curHash, this.state.encoded[nextIter]),
+               iteration: nextIter
+            })
+         }
+         else {
+            this.setState({warning: 'Done Encrypting!'})
+         }
       }
    }
 
@@ -256,6 +377,20 @@ class Md5Page extends React.Component {
                    </Form.Text>
                 </Form.Group>
                 <p>{this.state.result}</p>
+                <br></br>
+                <br></br>
+                <p>This is what the encoded message looks like</p>
+                <p>{this.state.encoded}</p>
+                <br></br>
+                <br></br>
+                <Button variant="primary" onClick={this.handleClick}>Iteration</Button>
+                <p>This is what step by step of the algorithm looks like: </p>
+                <p>A: {this.state.aCur}</p>
+                <p>B: {this.state.bCur}</p>
+                <p>C: {this.state.cCur}</p>
+                <p>D: {this.state.dCur}</p>
+                <br></br>
+                <p>{this.state.warning}</p>
              </Form>
           </Page>
       )
