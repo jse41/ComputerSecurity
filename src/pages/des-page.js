@@ -193,7 +193,7 @@ class DesPage extends React.Component {
         console.log(`Decrypted Message: ${decryptedMessage}`);
         console.log(`Decrypted Message: ${bitHandling.bitsToStr(decryptedBinary)}`);
         this.setState({
-            decryptedCiphertext: decryptedMessage,
+            decryptedCiphertext: bitHandling.bitsToStr(decryptedBinary),
         })
     }
 
@@ -260,7 +260,8 @@ class DesPage extends React.Component {
                             <UTFDisplay ascii={this.state.key.substring(0, 4)}/>
                             <br/>
                             <br/>
-                            <BinaryDisplay label="Your key" bits={bitHandling.strToBits(this.state.key.substring(0, 4))}/>
+                            <BinaryDisplay label="Your key"
+                                           bits={bitHandling.strToBits(this.state.key.substring(0, 4))}/>
                         </div>
                     </div>
                     <div className="section">
@@ -274,8 +275,8 @@ class DesPage extends React.Component {
                     </div>
                     <div className="section">
                         <h1>Encryption</h1>
-                        <p>DES encrypts a message by separating it into 64-bit pieces, and encrypting them one-by-one. For
-                            a simple string, this means the message will be encrypted in blocks of four characters</p>
+                        <p>DES encrypts a message by separating it into 64-bit pieces, and encrypting them one-by-one.
+                            For a simple string, this means the message will be encrypted in blocks of four characters.</p>
                         <p>The first block of your message is converted to bits as follows</p>
                         <br/>
                         <div style={{textAlign: 'center'}}>
@@ -286,21 +287,64 @@ class DesPage extends React.Component {
                         </div>
                     </div>
                     <div className="section">
-                        <h5>Initial Permutation</h5>
-                        <PermutationTable table={this.state.IP} columns={8}/>
-                        <p>Permutation Table: {this.state.IP}</p>
-                        <p>Permutation is the act of mapping with input bit to a new output position. In this
-                            permutation, the
-                            input is 64 bits and the output is 64 bits, no bits
-                            are lost or created, instead each and every bit is mapped to a single new location. For
-                            example,
-                            since the first entry in the permutation table is
-                            {this.state.IP[0]}, the bit at that index in the input becomes the first bit of the
-                            output.</p>
-                        <p>After Permuting: {this.state.afterInitialPermutation}</p>
+                        <h4>Algorithm Overview</h4>
+                        <p>
+                            <b>Initial Permutation</b>
+                            <br/>
+                            The first step in DES is to rearrange the bits in the first block using a permutation
+                            table, <Latex>$IP$</Latex>.
+                        </p>
+                        <p>
+                            <b>DES Rounds</b>
+                            <br/>
+                            The encryption process consists of 16 rounds, which correspond to the 16 generated keys.
+                            Before the first round, the message is split into left and right
+                            halves: <Latex>$L_0$</Latex> and <Latex>$R_0$</Latex>. Each round, the left and right hand
+                            sides are modified, so in
+                            the <Latex>$n$</Latex><sup>th</sup> round <Latex>$L_n$</Latex> and <Latex>$R_n$</Latex> are
+                            defined as…
+                        </p>
+                        <p style={{textAlign: 'center'}}>
+                            <div style={{display: 'inline-block', textAlign: 'left'}}>
+                                <Latex>{'$$L_n=R_{n-1}$$'}</Latex>
+                                <br/>
+                                <Latex>{'$$R_n=L_{n-1} \\oplus f(R_{n-1},K_n)$$'}</Latex>
+                            </div>
+                        </p>
+                        <p>where <Latex>$\oplus$</Latex> is a bitwise XOR, and <Latex>$f$</Latex> is a function that
+                            scrambles <Latex>{`$R_{n-1}$`}</Latex> using <Latex>$K_n$</Latex>.</p>
+                        <p>
+                            <b>Final Permutation</b>
+                            <br/>
+                            <p>After the 16th round, the final 32-bit <Latex>{`$L_{15}$ and $R_{15}$`}</Latex> are
+                                joined back together into a 64-bit message. The bits of this message are rearranged
+                                again using another permutation table, <Latex>{`$IP^{-1}$`}</Latex>, which yields the
+                                final encrypted message!</p>
+                        </p>
+                        <p>
+                            <b>And… Repeat!</b>
+                            <br/>
+                            <p>This process is repeated for each 64-bit block of the message to encrypt the whole
+                                thing</p>
+                        </p>
                     </div>
                     <div className="section">
-                        <h5>DES Rounds</h5>
+                        <h4>Initial Permutation <Latex>$(IP)$</Latex></h4>
+                        <p>Permutation is the act of mapping with input bit to a new output position. In this
+                            permutation, the input is 64 bits and the output is 64 bits, no bits are lost or created,
+                            instead each and every bit is mapped to a single new location. For example, since the first
+                            entry in the permutation table is {this.state.IP[0]}, the bit at that index in the input
+                            becomes the first bit of the output.</p>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Latex>$IP=$</Latex>&nbsp;
+                            <PermutationTable table={this.state.IP} columns={8}/>
+                        </div>
+                        <br />
+                        <BinaryDisplay label="Before Permuting" bits={this.state.first64Bits} />
+                        <BinaryDisplay label="After Permuting" bits={this.state.afterInitialPermutation} />
+                    </div>
+                    <div className="section">
+                        <h4>DES Rounds</h4>
                         <p>L0: {this.state.L0}</p>
                         <p>R0: {this.state.R0}</p>
                         <p>Insert latex equation</p>
