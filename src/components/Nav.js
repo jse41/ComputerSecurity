@@ -12,7 +12,7 @@ function Nav() {
       <div className='navbar-brand'>
         <Link to='/'>
           <div className='navImg'>
-            <img src='images/logo_j_tight_white.png' alt='Logo'></img>
+            <img src='images/CWRUSecurityGrey.png' alt='Logo'></img>
           </div>
         </Link>
       </div>

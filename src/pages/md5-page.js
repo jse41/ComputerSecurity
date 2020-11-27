@@ -3,6 +3,7 @@ import Alert from '../components/Alert'
 import Nav from '../components/Nav'
 import {Form} from 'react-bootstrap';
 import Page from "../components/shared/page";
+import { result } from 'lodash';
 
 // The cycle for actual bit manipulation
 function md5cycle(x, k) {
@@ -55,7 +56,7 @@ function md5cycle(x, k) {
    // Return happens since the values in x are returned
 }
 
-// This does the addditions and rotations of the bots
+// This does the addditions and rotations of the bits
 function collect(q, a, b, x, s, t) {
    a = add32(add32(a, q), add32(x, t));
    /// The right shift is to make it a circular shift
@@ -79,7 +80,7 @@ function ii(a, b, c, d, x, s, t) {
    return collect(c ^ (b | (~d)), a, b, x, s, t);
 }
 
-// The quickes way to make sure the result is in 32 bit space
+// The quickest way to make sure the result is in 32 bit space
 function add32(a, b) {
    return (a + b) & 0xFFFFFFFF
 }
@@ -103,7 +104,7 @@ function makeMD5(s) {
 
    // Loop over the string in 512 bit increments to build the resulting string
    //     64 characters at 8 bits a character is 512
-   for (i = 64; i <= s.length; i += 64) {
+   for (i = 64; i <= n; i += 64) {
       let block = md5block(s.substring(i - 64, i))
       md5cycle(hash, block);
    }
@@ -125,11 +126,13 @@ function makeMD5(s) {
    // If the string took up too much space, make another block essentially
    if (i > 55) {
       md5cycle(hash, tail);
-      for (i = 0; i < 16; i++) tail[i] = 0;
+      for (i = 0; i < 16; i++) {
+         tail[i] = 0;
+      }
    }
 
-   // describe the size of size of the entire messag which goes on the end
-   tail[14] = (n * 8) % 512;
+   // describe the size of size of the entire message which goes on the end
+   tail[14] = (n * 8) % (2 ** 64);
 
    // Hash the last block
    md5cycle(hash, tail);
@@ -171,8 +174,50 @@ function hex(x) {
 
 // Calls all that is needed to return the text output of MD5
 function md5(message) {
+   console.log(makeDisplayBlock(message))
    return hex(makeMD5(message));
 }
+
+function makeDisplayBlock(s) {
+   let n = s.length
+   let result = []
+   let i;
+   // Loop over the string in 512 bit increments to build the resulting string
+   //     64 characters at 8 bits a character is 512
+   for (i = 64; i <= n; i += 64) {
+      let block = md5block(s.substring(i - 64, i))
+      result.push(block)
+   }
+
+   // isolate the final string
+   s = s.substring(i - 64);
+
+   // The last block
+   var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+   // Build the block with the characters in the approapriate form
+   //     Lower bits come first
+   for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+
+   // Set the leading 1 bit of the buffer
+   tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+
+   // If the string took up too much space, make another block essentially
+   if (i > 55) {
+      result.push(tail)
+      for (i = 0; i < 16; i++) {
+         tail[i] = 0;
+      }
+   }
+
+   // describe the size of size of the entire message which goes on the end
+   tail[14] = (n * 8) % (2 ** 64);
+
+   // Hash the last block
+   result.push(tail)
+   return(result)
+} 
 
 
 /**
