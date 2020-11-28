@@ -105,9 +105,10 @@ function expansionPermutation(bits){
      return xorWithLeft;
  }
 
-function DESRounds({input, keys, P}){
+function DESRounds({ input, keys, P, initialHalvesCallback }){
     // Does the 16 rounds of DES for a 64 bit block
     let [L, R] = bitHandling.makeHalves(input);
+    initialHalvesCallback(L, R);
 
     // Performs 16 rounds of DES
     for (let i = 0; i < 16; i++){

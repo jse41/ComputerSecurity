@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
-import {Form} from 'react-bootstrap';
+import {Card, Form} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button'
 import Collapsible from 'react-collapsible';
 import bitHandling from '../bit-handling-2';
@@ -49,6 +49,10 @@ class DesPage extends React.Component {
         this.doEncryption = this.doEncryption.bind(this);
     }
 
+    componentDidMount() {
+        this.doEncryption();
+    }
+
     handleUpdate(prop, e) {
         this.setState({[prop]: e.target.value});
     }
@@ -95,6 +99,7 @@ class DesPage extends React.Component {
                 input: initialPermutation,
                 keys,
                 P,
+                initialHalvesCallback: (L, R) => this.setState({L0: L, R0: R}),
             });
 
             const finalPermutation = bitHandling.permutate(afterDESRounds, FP);
@@ -276,7 +281,8 @@ class DesPage extends React.Component {
                     <div className="section">
                         <h1>Encryption</h1>
                         <p>DES encrypts a message by separating it into 64-bit pieces, and encrypting them one-by-one.
-                            For a simple string, this means the message will be encrypted in blocks of four characters.</p>
+                            For a simple string, this means the message will be encrypted in blocks of four
+                            characters.</p>
                         <p>The first block of your message is converted to bits as follows</p>
                         <br/>
                         <div style={{textAlign: 'center'}}>
@@ -316,7 +322,7 @@ class DesPage extends React.Component {
                         <p>
                             <b>Final Permutation</b>
                             <br/>
-                            <p>After the 16th round, the final 32-bit <Latex>{`$L_{15}$ and $R_{15}$`}</Latex> are
+                            <p>After the 16th round, the final 32-bit <Latex>{`$L_{16}$ and $R_{16}$`}</Latex> are
                                 joined back together into a 64-bit message. The bits of this message are rearranged
                                 again using another permutation table, <Latex>{`$IP^{-1}$`}</Latex>, which yields the
                                 final encrypted message!</p>
@@ -335,38 +341,55 @@ class DesPage extends React.Component {
                             instead each and every bit is mapped to a single new location. For example, since the first
                             entry in the permutation table is {this.state.IP[0]}, the bit at that index in the input
                             becomes the first bit of the output.</p>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                             <Latex>$IP=$</Latex>&nbsp;
                             <PermutationTable table={this.state.IP} columns={8}/>
                         </div>
-                        <br />
-                        <BinaryDisplay label="Before Permuting" bits={this.state.first64Bits} />
-                        <BinaryDisplay label="After Permuting" bits={this.state.afterInitialPermutation} />
+                        <br/>
+                        <BinaryDisplay label="Before Permuting" bits={this.state.first64Bits}/>
+                        <BinaryDisplay label="After Permuting" bits={this.state.afterInitialPermutation}/>
                     </div>
                     <div className="section">
                         <h4>DES Rounds</h4>
-                        <p>L0: {this.state.L0}</p>
-                        <p>R0: {this.state.R0}</p>
-                        <p>Insert latex equation</p>
-                        <Collapsible trigger="f Function">
-                            <p>Overview of f function</p>
-                            <p>Expansion Box: {this.state.expansionBox}</p>
-                            <p>After Expansion: {this.state.afterExpansionBox}</p>
-                            <p>XOR with the key:</p>
-                            <p>Key: {this.state.keys[0]}</p>
-                            <p>After XOR: {this.state.afterXorWithKey}</p>
-                            <Collapsible trigger="S Boxes">
-                                <p>First 6 bits of input: {this.state.afterXorWithKey.substring(0, 6)}</p>
-                                <p>Row (formed with the first and last bit of the
-                                    input): {this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}</p>
-                                <p>Column (formed with the middle 4 bits of the
-                                    input): {this.state.afterXorWithKey.substring(1, 5)}</p>
-                                <p>Using the row and column calculated above, the corresponding table entry at that
-                                    location is
-                                    the new output.</p>
+                        <p>This permuted message is then split into <Latex>$L_0$ and $R_0$</Latex>, as follows…</p>
+                        <div className="container">
+                            <div className="row">
+                                <div className="col-12 col-md-6 text-center">
+                                    <BinaryDisplay label="$L_0$" bits={this.state.L0}/>
+                                </div>
+                                <div className="col-12 col-md-6 text-center">
+                                    <BinaryDisplay label="$R_0$" bits={this.state.R0}/>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <p>After this, each <Latex>$L_n$</Latex> and <Latex>$R_n$</Latex> are computed as &nbsp;
+                            <Latex>{'$L_n=R_{n-1}$ and $R_n=L_{n-1} \\oplus f(R_{n-1},K_n)$.'}</Latex>
+                        </p>
+                        <Card style={{padding: '0.5em 1em'}}>
+                            <Collapsible trigger={<Latex>$f$ function (show more)</Latex>}
+                                         triggerWhenOpen={<Latex>$f$ function (hide)</Latex>}>
+                                <p>Overview of f function</p>
+                                <p>Expansion Box: {this.state.expansionBox}</p>
+                                <p>After Expansion: {this.state.afterExpansionBox}</p>
+                                <p>XOR with the key:</p>
+                                <p>Key: {this.state.keys[0]}</p>
+                                <p>After XOR: {this.state.afterXorWithKey}</p>
+                                <Card style={{padding: '0.5em 1em'}}>
+                                    <Collapsible trigger="S Boxes">
+                                        <p>First 6 bits of input: {this.state.afterXorWithKey.substring(0, 6)}</p>
+                                        <p>Row (formed with the first and last bit of the
+                                            input): {this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}</p>
+                                        <p>Column (formed with the middle 4 bits of the
+                                            input): {this.state.afterXorWithKey.substring(1, 5)}</p>
+                                        <p>Using the row and column calculated above, the corresponding table entry at that
+                                            location is
+                                            the new output.</p>
+                                    </Collapsible>
+                                </Card>
+                                <p>After Permutation: {this.state.afterPermutation}</p>
                             </Collapsible>
-                            <p>After Permutation: {this.state.afterPermutation}</p>
-                        </Collapsible>
+                        </Card>
                     </div>
                     <div className="section">
                         <h1>Results</h1>
