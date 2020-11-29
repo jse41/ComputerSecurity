@@ -277,6 +277,7 @@ class DesPage extends React.Component {
                         <h3>Generated Keys</h3>
                         {this.state.keys.map((key, n) => (
                             <BinaryDisplay
+                                key={n}
                                 label={`$K_{${n + 1}}$`}
                                 bits={key}
                             />
@@ -386,7 +387,8 @@ class DesPage extends React.Component {
                                             input): {this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}</p>
                                         <p>Column (formed with the middle 4 bits of the
                                             input): {this.state.afterXorWithKey.substring(1, 5)}</p>
-                                        <p>Using the row and column calculated above, the corresponding table entry at that
+                                        <p>Using the row and column calculated above, the corresponding table entry at
+                                            that
                                             location is
                                             the new output.</p>
                                     </Collapsible>
