@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import './permutation-table.css';
 
-const PermutationTable = ({ title = 'Permutation Table', table, columns }) => {
+const PermutationTable = ({ title = 'Permutation Table', showIndices = true, table, columns }) => {
     const rows = _.chunk(table, columns);
 
     return (
@@ -15,7 +15,7 @@ const PermutationTable = ({ title = 'Permutation Table', table, columns }) => {
                     <tr key={r}>
                         {row.map((bit, c) => (
                             <td key={c}>
-                                <span className="index">{(r * columns) + c + 1}</span>
+                                {showIndices && <span className="index">{(r * columns) + c + 1}</span>}
                                 <span className="permuted">{bit}</span>
                             </td>
                         ))}

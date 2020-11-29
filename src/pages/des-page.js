@@ -436,7 +436,7 @@ class DesPage extends React.Component {
                                                 alignItems: 'center'
                                             }}>
                                                 <Latex>S-Box$=$</Latex>&nbsp;
-                                                <PermutationTable table={sBoxes[0]} columns={16}/>
+                                                <PermutationTable table={sBoxes[0]} columns={16} showIndices={false}/>
                                             </div>
                                             <p>The row and column correspond to the entry of value
                                                 <Latex>{` ${parseInt(this.state.afterSBox.substring(0, 4), 2)}. `}</Latex>
