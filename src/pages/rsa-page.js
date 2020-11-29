@@ -69,11 +69,11 @@ function rsa_decrypt(message, d, N) {
     return text;
 }
 
-console.log('I aint never seen 2 pretty best friends');
-console.log(ascii_encrypt('I aint never seen 2 pretty best friends'));
-console.log(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127));
-console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127));
-console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127)));
+// console.log('I aint never seen 2 pretty best friends');
+// console.log(ascii_encrypt('I aint never seen 2 pretty best friends'));
+// console.log(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127));
+// console.log(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127));
+// console.log(ascii_decrypt(rsa_decrypt(rsa_encrypt(ascii_encrypt('I aint never seen 2 pretty best friends'), 47, 3127), 2631, 3127)));
 
 function gcd(a, b) {
     if ((typeof a !== 'number') || (typeof a !== 'number'))
@@ -229,7 +229,7 @@ const RsaPage = () => {
                     <div className='user-input'>
                         <Form.Group className='form-inline'>
                             <Form.Label>
-                                <Latex>$p$: </Latex>
+                                <Latex>$p:\ $ </Latex>
                             </Form.Label>
                             <Form.Control type='number' placeholder='enter p' value={p}
                                           onChange={event => setP(event.target.value)}/>
@@ -238,7 +238,7 @@ const RsaPage = () => {
 
                         <Form.Group className='form-inline'>
                             <Form.Label>
-                                <Latex>$q$: </Latex>
+                                <Latex>$q:\ $ </Latex>
                             </Form.Label>
                             <Form.Control type='number' placeholder='enter q' value={q}
                                           onChange={event => setQ(event.target.value)}/>
@@ -249,17 +249,19 @@ const RsaPage = () => {
                 </ListGroup.Item>
 
                 <ListGroup.Item>
+                    <p>The product of p and q will become half of the public key</p>
                     <p>
-                        <Latex>Calculate $N = p \times q$</Latex>
+                        <Latex>We calculate $n = p \times q$:</Latex>
                     </p>
                     <p>
-                        <Latex>$N =\ $</Latex>
+                        <Latex>$n =\ $</Latex>
                         {n}
                     </p>
                 </ListGroup.Item>
 
                 <ListGroup.Item>
                     <p>
+                        <p>Using Euler's Totient Function, we calculate <Latex>$\phi(n)$</Latex> which is the number of positive integers less than n that are coprime to n.</p>
                         <strong>
                             <Latex>$\phi$ function: </Latex>
                         </strong>
@@ -273,13 +275,16 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
+                        A number <em>e</em> is a relatively prime number to <Latex>$\phi$(n)</Latex> that will be the other half of the public key
+                    </p>
+                    <p>
                         <Latex>Receiver (decryptor) picks encryption number e: </Latex>
                     </p>
                     {/* Use isValid_e here */}
                     <div className='user-input'>
                         <Form.Group className='form-inline'>
                             <Form.Label>
-                                <Latex>$e$: </Latex>
+                                <Latex>$e:\ $ </Latex>
                             </Form.Label>
                             <Form.Control type='number' placeholder='enter e' value={e}
                                           onChange={event => setE(event.target.value)}/>
@@ -311,7 +316,7 @@ const RsaPage = () => {
                     <div className='user-input'>
                         <Form.Group className='form-inline'>
                             <Form.Label>
-                                <Latex>$d$: </Latex>
+                                <Latex>$d:\ $</Latex>
                             </Form.Label>
                             <Form.Control type='number' placeholder='enter d' value={d}
                                           onChange={event => setD(event.target.value)}/>
@@ -328,7 +333,7 @@ const RsaPage = () => {
                     <div className='user-input'>
                         <Form.Group className='form-inline'>
                             <Form.Label>
-                                <Latex>Message:</Latex>
+                                <Latex>Message $:\  $</Latex>
                             </Form.Label>
                             <Form.Control type='text' placeholder='enter message' value={message}
                                           onChange={event => setMessage(event.target.value)}/>
@@ -377,12 +382,6 @@ const RsaPage = () => {
                     <p>
                         {/* Use ascii_decrypt() here, with message = m from c^d mod N */}
                         {ascii_decrypted}
-                    </p>
-                </ListGroup.Item>
-
-                <ListGroup.Item>
-                    <p>
-                        <Latex>Calc modular inverse...</Latex>
                     </p>
                 </ListGroup.Item>
             </ListGroup>
