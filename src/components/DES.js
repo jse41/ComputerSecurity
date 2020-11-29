@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 
 const sBoxes = getSBoxes();
-const expansionBox = getExpansionBox();
+const expansionBox = [31,0,1,2,3,4,3,4,5,6,7,8,7,8,9,10,11,12,11,12,13,14,15,16,15,16,17,18,19,20,19,20,21,22,23,24,23,24,25,26,27,28,27,28,29,30,31,0];
 
 function getSBoxes() {
     // Obtained from: https://www.oreilly.com/library/view/computer-security-and/9780471947837/sec9.3.html
@@ -44,13 +44,6 @@ function getSBoxes() {
     return sBoxes;
  }
 
- function getExpansionBox(bits){
-    return [31,0,1,2,3,4,3,4,5,6,7,8,7,
-        8,9,10,11,12,11,12,13,14,15,16,15,
-        16,17,18,19,20,19,20,21,22,23,24,23,
-        24,25,26,27,28,27,28,29,30,31,0];
-}
-
 function sBoxBlock({bits, sBoxes}){
     let output = "";
     for (let i = 0; i < 8; i++){
@@ -63,7 +56,7 @@ function sBoxBlock({bits, sBoxes}){
     return output;
  }
 
- function round({L, R, i, keys, P}){
+ function round({L, R, i, keys, P, initialCallback, isInitialRound}){
      // Expand right size from 32 to 48 bits
      const expandedR0 = bitHandling.permutate(R, expansionBox);
 
@@ -82,18 +75,24 @@ function sBoxBlock({bits, sBoxes}){
      // XOR with left side
      const xorWithLeft = bitHandling.XOR(permutatedBlock, L);
 
+     if (isInitialRound){
+         console.log("first round");
+         initialCallback(L, R, expandedR0, xorWithKey, afterSBox, permutatedBlock, xorWithLeft);
+     }
+
      // Assign to new right side
      return xorWithLeft;
  }
 
-function DESRounds({ input, keys, P, initialHalvesCallback }){
+function DESRounds({ input, keys, P, isFirstRound, initialCallback }){
     // Does the 16 rounds of DES for a 64 bit block
     let [L, R] = bitHandling.makeHalves(input);
-    initialHalvesCallback(L, R);
+    let isInitialRound = isFirstRound;
 
     // Performs 16 rounds of DES
     for (let i = 0; i < 16; i++){
-       [L, R] = [R, round({L, R, i, keys, P})];
+       [L, R] = [R, round({L, R, i, keys, P, initialCallback, isInitialRound})];
+       isInitialRound = false;
     }
 
     return R + L;
