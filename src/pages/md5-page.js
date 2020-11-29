@@ -1,6 +1,7 @@
 import React from 'react';
 import {Form, Button} from 'react-bootstrap';
 import Page from "../components/shared/page";
+import Latex from 'react-latex'
 //import bitsToStr from "../bit-handling-2";
 //import { result } from 'lodash';
 
@@ -284,9 +285,6 @@ function* md5cycleIterations(x, k) {
 }
 
 function makeASCII(input) {
-   if (input === "") {
-      return "Input a message"
-   }
    var output = ""
    for (var i = 0; i < input.length; i++) {
       output += input[i].charCodeAt(0).toString(2) + " ";
@@ -308,7 +306,7 @@ class Md5Page extends React.Component {
          isToggleOn: true,
          message: "",
          result: md5(""),
-         ascii: "Input a message",
+         ascii: "",
          cipher: "",
          clear: "",
          aCur: hex([curHash[0]]),
@@ -318,7 +316,9 @@ class Md5Page extends React.Component {
          iterator: md5cycleIterations(curHash, blocks[0]), 
          iteration: 0,
          encoded: makePretty(blocks),
-         warning: "", 
+         warning: "",
+         numIteration: 0,
+         disableButton: true,
       };
 
       this.handleFormUpdate = this.handleFormUpdate.bind(this);
@@ -334,6 +334,7 @@ class Md5Page extends React.Component {
             message: input,
             result: md5(input),
             ascii: makeASCII(input),
+            encodedPretty: makePretty(blocks),
             encoded: blocks,
             aCur: hex([initials[0]]),
             bCur: hex([initials[1]]),
@@ -341,7 +342,9 @@ class Md5Page extends React.Component {
             dCur: hex([initials[3]]),
             iterator: md5cycleIterations(curHash, blocks[0]),
             iteration: 0,
-            warning: "", 
+            warning: "",
+            numIteration: 0,
+            disableButton: false,
          })
       }
    }
@@ -355,6 +358,7 @@ class Md5Page extends React.Component {
             bCur: hex([result['b']]),
             cCur: hex([result['c']]),
             dCur: hex([result['d']]),
+            numIteration: this.state.numIteration + 1
          }) 
       }
       else {
@@ -363,16 +367,18 @@ class Md5Page extends React.Component {
             bCur: hex([curHash[1]]),
             cCur: hex([curHash[2]]),
             dCur: hex([curHash[3]]),
+            numIteration: this.state.numIteration + 1,
+            disableButton: true
          })
          let nextIter = this.state.iteration + 1
          if (nextIter < this.state.encoded.length) {
             this.setState({
                iterator: md5cycleIterations(curHash, this.state.encoded[nextIter]),
-               iteration: nextIter
+               iteration: nextIter,
             })
          }
          else {
-            this.setState({warning: 'Done Encrypting!'})
+            this.setState({warning: 'Done Encrypting! Enter a new message to iterate again.'})
          }
       }
    }
@@ -380,32 +386,49 @@ class Md5Page extends React.Component {
    render() {
       return (
           <Page title="MD5">
-             <p>MD5 (or the Fifth Generation of the Message-Digest Algorithm) is a hashing function that yields a 128-bit hash of any length message. </p>
+             <p>MD5 (or the Fifth Generation of the Message-Digest Algorithm) is a hashing function that yields a 128-bit hash of any length message.</p>
              <Form>
                 <Form.Group controlId="EncryptUpdate">
-                   <Form.Label>Message</Form.Label>
+                   <Form.Label><b>Message</b></Form.Label>
                    <Form.Control type="text" onChange={this.handleFormUpdate} placeholder="Message to Encrypt" />
                    <Form.Text className="text-muted">
                       This is the plain text information you want to share.
                    </Form.Text>
                 </Form.Group>
-                <p>This is the ASCII (bit code) representation of your message:</p>
+                <p><b>ASCII (bit code) Representation of Your Message</b></p>
                 <p>{this.state.ascii}</p>
-                <hr></hr>
-                <p>This is the resulting MD5 hash:</p>
+                <hr/>
+                <p><b>Resulting MD5 Hash</b></p>
                 <p>{this.state.result}</p>
-                <hr></hr>
-                <p>This is what the encoded message looks like:</p>
-                <p>{this.state.encoded}</p>
-                <hr></hr>
-                <Button variant="primary" onClick={this.handleClick}>Iteration</Button>
-                <p>This is what step by step of the algorithm looks like</p>
+                <hr/>
+                <p><b>How Does it Work?</b></p>
+                <p style={{textAlign: 'left'}}>The MD5 algorithm processes the input variable-length message into a resulting fixed-length hash of 128-bits. As shown below, the input message is broken into sixteen 32-bit words
+                   based on its ASCII character codes, making chunks of 512-bit blocks.</p>
+                <p>{this.state.encodedPretty}</p>
+                <p style={{textAlign: 'left'}}>Then, the message is run through a padding technique in which a single one-bit is appended to the end of the message, followed by as many zeros as necessary
+                   to bring the length of the message to 64 bits <i>less than</i> a multiple of 512. Then, the remaining bits are filled up with 64 bits representing the length of the
+                   original message, modulo <Latex>{'$$2^{64}$$'}</Latex>. This allows the message's length to be fixed to a multiple of 512, conforming to the encryption length necessary.
+                </p>
+                <p style={{textAlign: 'left'}}>MD5 initially starts with fixed constants for four 32-bit words, shown below as A, B, C, and D. Each 512-bit message block modifies the state through <i>rounds</i>. Each round
+                is composed of 16 similar operations reliant on a non-linear function F, modular addition, and left rotation. Each iteration can be stepped through below showing the modification of
+                each of the four 32-bit words, represented in hexadecimal below, until the encryption is complete (after 64 iterations, for a total of 65 iterations):</p>
+                {this.state.disableButton && <p><i>In order to demonstrate iterations of the MD5 algorithm, you must have a message to encrypt.</i></p>}
+                <Button disabled={this.state.disableButton} variant="primary" onClick={this.handleClick}>Iteration</Button>
                 <p>A: {this.state.aCur}</p>
                 <p>B: {this.state.bCur}</p>
                 <p>C: {this.state.cCur}</p>
                 <p>D: {this.state.dCur}</p>
-                <br></br>
+                <p>Iteration: {this.state.numIteration}</p>
                 <p>{this.state.warning}</p>
+                <p style={{textAlign: 'left'}}>Each MD5 operation utilizes one of four possible functions, and a different one is used each round:</p>
+                <Latex>{'$$F(B,C,D)=(B \\land C) \\lor (\\lnot B \\land D)$$'}</Latex>
+                <br/>
+                <Latex>{'$$G(B,C,D)=(B \\land D) \\lor (C \\land \\lnot D)$$'}</Latex>
+                <br/>
+                <Latex>{'$$H(B,C,D)=B \\oplus C \\oplus D$$'}</Latex>
+                <br/>
+                <Latex>{'$$I(B,C,D)=C \\oplus (B \\lor \\lnot D)$$'}</Latex>
+
              </Form>
           </Page>
       )
