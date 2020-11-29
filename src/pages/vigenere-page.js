@@ -1,6 +1,12 @@
 import React from 'react';
 import Page from "../components/shared/page";
-import {Form, Row, Col, Container} from 'react-bootstrap';
+import {Form, Row, Col, Container, Button, Table} from 'react-bootstrap';
+
+var chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
+      "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D",
+      "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+      "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "[", "]", ";", "'", "\"", "\\", "|", ":", "_", "+",
+      ",", ".", "<", ">", "{", "}", "/", "?", "`", "~", " "]
 
 class VigenerePage extends React.Component {
 
@@ -15,12 +21,21 @@ class VigenerePage extends React.Component {
          cipherKey: "",
          clear: "",
          useAscii: false,
+         scrollPos: 0,
+         selectChar: "",
+         selectKeyChar: "", 
+         selectResultChar: "", 
+         selectCharInt: 0,
+         selectKeyCharInt: 0, 
+         selectResultCharInt: 0, 
+         
       };
 
       // This binding is necessary to make `this` work in the callback
       this.handleClick = this.handleClick.bind(this);
       this.handleChange = this.handleChange.bind(this);
       this.handleFormUpdate = this.handleFormUpdate.bind(this);
+      this.handleScroll = this.handleScroll.bind(this);
     }
 
    handleClick(e) {
@@ -32,11 +47,11 @@ class VigenerePage extends React.Component {
    handleFormUpdate(e) {
       if(e.target.id === "EncryptUpdate") {
          this.setState({message: e.target.value});
-         this.setState({result: this.encrypt(e.target.value, this.state.key)})
+         this.setState({result: this.encrypt(e.target.value, this.state.key)}, this.updateScroll)
       }
       else if (e.target.id === "keyUpdate") {
          this.setState({key: e.target.value});
-         this.setState({result: this.encrypt(this.state.message, e.target.value)})
+         this.setState({result: this.encrypt(this.state.message, e.target.value)}, this.updateScroll)
       }
       else if(e.target.id === "cipherUpdate") {
          this.setState({cipher: e.target.value});
@@ -55,16 +70,80 @@ class VigenerePage extends React.Component {
 
    runUpdates() {
       this.setState({result: this.encrypt(this.state.message, this.state.key)})
-      this.setState({clear: this.decrypt(this.state.cipher, this.state.cipherKey)})
+      this.setState({clear: this.decrypt(this.state.cipher, this.state.cipherKey)}, this.updateScroll)
+   }
+
+   updateScroll() {
+      let scrollInd = this.state.scrollPos
+      if(this.state.message.length === 0 || scrollInd < 0) {
+         this.setState({
+            selectChar: "",
+            selectKeyChar: "", 
+            selectResultChar: "", 
+            selectCharInt: 0,
+            selectKeyCharInt: 0, 
+            selectResultCharInt: 0, 
+            scrollPos: 0,
+         })
+         return 1
+      }
+      if(scrollInd >= this.state.message.length) {
+         this.setState({scrollPos: this.state.message.length - 1}, this.updateScroll)
+      }
+      else {
+         let selectM = this.state.message[scrollInd]
+         this.setState({selectChar: selectM})
+         if (!this.state.useAscii) {
+            this.setState({selectCharInt: chars.indexOf(selectM)})
+         }
+         else {
+            this.setState({selectCharInt: selectM.charCodeAt(0)})
+         }
+         let encRes = ""
+         if (this.state.key.length === 0) {
+            this.setState({
+               selectKeyChar: "",
+               selectKeyCharInt: 0, 
+            })
+            encRes = this.encrypt(selectM, "")
+            this.setState({selectResultChar: encRes})
+         }
+         else{
+            this.setState({selectKeyChar: this.state.key[scrollInd % this.state.key.length]})
+            encRes = this.encrypt(selectM, this.state.key[scrollInd % this.state.key.length])
+            this.setState({selectResultChar: encRes})
+            if (!this.state.useAscii) {
+               this.setState({selectKeyCharInt: chars.indexOf(this.state.key[scrollInd % this.state.key.length])})
+            }
+            else {
+               this.setState({selectKeyCharInt: this.state.key[scrollInd % this.state.key.length].charCodeAt(0)})
+            }
+         }
+         if (!this.state.useAscii) {
+            this.setState({selectResultCharInt: chars.indexOf(encRes)})
+         }
+         else {
+            this.setState({selectResultCharInt: encRes.charCodeAt(0)})
+         }
+      }
+   }
+
+   handleScroll(e) {
+
+      let scrollInd = this.state.scrollPos
+      if(e.target.id === "LeftSelect") {
+         if (scrollInd !== 0) {
+            this.setState({scrollPos: scrollInd - 1}, this.updateScroll)
+         }
+      }
+      else if(e.target.id === "RightSelect") {
+         if (scrollInd <= this.state.message.length) {
+            this.setState({scrollPos: scrollInd + 1}, this.updateScroll)
+         }
+      }
    }
 
    encrypt(message, key) {
-
-      let chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-      "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D",
-      "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-      "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "[", "]", ";", "'", "\"", "\\", "|", ":", "_", "+",
-      ",", ".", "<", ">", "{", "}", "/", "?", "`", "~", " "]
 
       let result = ""
 
@@ -210,6 +289,40 @@ class VigenerePage extends React.Component {
                </Form.Group>
             </fieldset>
              <br></br>
+             <Container>
+                <Row>
+                   <Col sm={1}><br></br><br></br><Button id='LeftSelect' variant="secondary" onClick={this.handleScroll}>Left</Button></Col>
+                  <Col>
+                     <Table striped bordered hover>
+                        <thead>
+                           <tr>
+                              <th>#</th>
+                              <th>String Form</th>
+                              <th>Integer Form</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Message Element</td>
+                              <td>{this.state.selectChar}</td>
+                              <td>{this.state.selectCharInt}</td>
+                           </tr>
+                           <tr>
+                              <td>Key Element</td>
+                              <td>{this.state.selectKeyChar}</td>
+                              <td>{this.state.selectKeyCharInt}</td>
+                           </tr>
+                           <tr>
+                              <td>Result</td>
+                              <td>{this.state.selectResultChar}</td>
+                              <td>{this.state.selectResultCharInt}</td>
+                           </tr>
+                        </tbody>
+                     </Table>
+                  </Col>
+                   <Col sm={1}><br></br><br></br><Button id='RightSelect' variant="secondary" onClick={this.handleScroll}>Right</Button></Col>
+                </Row>
+             </Container>
              <br></br>
              <Form>
                 <Form.Group controlId="cipherUpdate">
