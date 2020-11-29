@@ -441,16 +441,9 @@ class DesPage extends React.Component {
                                         the next round.
                                         <BinaryDisplay label="After XOR" bits={this.state.afterXorWithLeft}/></p>
                                 </div>
-                                <div className="container">
-                                    <div className="row">
-                                        <div className="col-12 col-md-6 text-center">
-                                            <BinaryDisplay label="$L_1$" bits={this.state.R0}/>
-                                        </div>
-                                        <div className="col-12 col-md-6 text-center">
-                                            <BinaryDisplay label="$R_1$" bits={this.state.afterXorWithLeft}/>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p className="text-center">
+                                    <Latex>{`$\\underbrace{${this.state.R0}}_{L1}\\text{ }\\underbrace{${this.state.afterXorWithLeft}}_{R1}$`}</Latex>
+                                </p>
                                 <div className="section">
                                     <p>
                                         <b>And… Repeat!</b>
@@ -461,7 +454,7 @@ class DesPage extends React.Component {
                                 </div>
                             </Collapsible>
                         </Card>
-                        <br/>
+                        <br/>   
                         <p>The results of this process are as follows:</p>
                         {(this.state.halves || []).map(([L, R], n) => (
                             n ? <p className="text-center" key={n}>
