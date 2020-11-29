@@ -84,6 +84,7 @@ class VigenerePage extends React.Component {
             selectKeyCharInt: 0, 
             selectResultCharInt: 0, 
             scrollPos: 0,
+            modNote: ""
          })
          return 1
       }
@@ -114,9 +115,21 @@ class VigenerePage extends React.Component {
             this.setState({selectResultChar: encRes})
             if (!this.state.useAscii) {
                this.setState({selectKeyCharInt: chars.indexOf(this.state.key[scrollInd % this.state.key.length])})
+               if (chars.indexOf(this.state.key[scrollInd % this.state.key.length]) + chars.indexOf(selectM) > chars.length) {
+                  this.setState({modNote: "*When the sum falls outside of the character list, it loops to the bottom!"})
+               }
+               else {
+                  this.setState({modNote: ""})
+               }
             }
             else {
                this.setState({selectKeyCharInt: this.state.key[scrollInd % this.state.key.length].charCodeAt(0)})
+               if (this.state.key[scrollInd % this.state.key.length].charCodeAt(0) + selectM.charCodeAt(0) > 127) {
+                  this.setState({modNote: "*When the sum falls outside of the character list, it loops to the bottom!"})
+               }
+               else {
+                  this.setState({modNote: ""})
+               }
             }
          }
          if (!this.state.useAscii) {
@@ -271,7 +284,7 @@ class VigenerePage extends React.Component {
                   <Col sm={10}>
                   <Form.Check
                      type="radio"
-                     label="Visual Character Set"
+                     label="Visual Character Set*"
                      name="formHorizontalRadios"
                      id="formHorizontalRadios1"
                      checked={!this.state.useAscii}
@@ -323,6 +336,7 @@ class VigenerePage extends React.Component {
                    <Col sm={1}><br></br><br></br><Button id='RightSelect' variant="secondary" onClick={this.handleScroll}>Right</Button></Col>
                 </Row>
              </Container>
+             <p><small>{this.state.modNote}</small></p>
              <br></br>
              <Form>
                 <Form.Group controlId="cipherUpdate">
@@ -350,6 +364,8 @@ class VigenerePage extends React.Component {
                </Row>
             </Container>
              <br></br>
+             <br></br>
+             <p><small>*Visual Character Set is a selected subset of characters that are all able to be rendered easily in browsers, opposed to ASCII. Not an industry standard.</small></p>
           </Page>
       )
    }
