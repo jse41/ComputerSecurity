@@ -99,7 +99,13 @@ class DesPage extends React.Component {
                 input: initialPermutation,
                 keys,
                 P,
-                initialHalvesCallback: (L, R) => this.setState({L0: L, R0: R}),
+                initialHalvesCallback: (L, R, eBox, sBox) => this.setState({
+                    L0: L,
+                    R0: R,
+                    expansionBox: eBox,
+                    sBox: sBox
+
+                }),
             });
 
             const finalPermutation = bitHandling.permutate(afterDESRounds, FP);
@@ -164,7 +170,7 @@ class DesPage extends React.Component {
             keys: keys,
             first64BitBlock: paddedMessage.substring(0, 4),
             IP: IP,
-            P: P
+            P: P,
         })
 
         this.doDecryption({
@@ -174,15 +180,6 @@ class DesPage extends React.Component {
             P,
             FP,
         });
-        //
-        // // Convert encrypted number to characters for the encrypted message
-        // let decryptedMessage = bitHandling.bitsToHex(decryptedNumber)
-        //
-        // this.setState({
-        //    decryptedCiphertext: decryptedMessage
-        // })
-        //
-
     }
 
     doDecryption({cipherbits, keys, IP, FP, P}) {
@@ -323,7 +320,7 @@ class DesPage extends React.Component {
                             <b>Final Permutation</b>
                             <br/>
                             <p>After the 16th round, the final 32-bit <Latex>{`$L_{16}$ and $R_{16}$`}</Latex> are
-                                joined back together into a 64-bit message. The bits of this message are rearranged
+                                swapped and joined back together into a 64-bit message. The bits of this message are rearranged
                                 again using another permutation table, <Latex>{`$IP^{-1}$`}</Latex>, which yields the
                                 final encrypted message!</p>
                         </p>
@@ -331,7 +328,7 @@ class DesPage extends React.Component {
                             <b>And… Repeat!</b>
                             <br/>
                             <p>This process is repeated for each 64-bit block of the message to encrypt the whole
-                                thing</p>
+                                thing.</p>
                         </p>
                     </div>
                     <div className="section">
@@ -370,10 +367,25 @@ class DesPage extends React.Component {
                             <Collapsible trigger={<Latex>$f$ function (show more)</Latex>}
                                          triggerWhenOpen={<Latex>$f$ function (hide)</Latex>}>
                                 <p>Overview of f function</p>
-                                <p>Expansion Box: {this.state.expansionBox}</p>
+                                <p><b>Expansion Box</b>
+                                    <br/>
+                                    This operation expands <Latex>$R_i$</Latex> from 32 bits to 48 bits. This done by
+                                    using this permutation table to repeat certain bits in order to make the right side
+                                    longer.
+                                    </p>
+                                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                    <Latex>$Expansion$ $Permuation=$</Latex>&nbsp;
+                                    <PermutationTable table={this.state.expansionBox} columns={8}/>
+                                </div>
                                 <p>After Expansion: {this.state.afterExpansionBox}</p>
-                                <p>XOR with the key:</p>
-                                <p>Key: {this.state.keys[0]}</p>
+                                <p><b>XOR</b>
+                                    <br/>
+                                    The bits are then XORed the key corresponding to that round. For example, in the
+                                    first round, the bits will be XORed with <Latex>{`$K_1$`}</Latex>, then with
+                                    <Latex>{` $K_2$`}</Latex> in the second round, and so forth, until XORing with
+                                    <Latex>{` $K_{16}$`}</Latex> in the last round.
+                                </p>
+                                <p>The First Key: {this.state.keys[0]}</p>
                                 <p>After XOR: {this.state.afterXorWithKey}</p>
                                 <Card style={{padding: '0.5em 1em'}}>
                                     <Collapsible trigger="S Boxes">
@@ -395,6 +407,16 @@ class DesPage extends React.Component {
                         <h1>Results</h1>
                         <p>Your encrypted message:</p>
                         <p>{this.state.encryptedPlaintext}</p>
+                        <br/>
+                    </div>
+                    <div className="section">
+                        <h1>Decryption</h1>
+                        <p>DES decrypts a message using the same algorithm in the same order, but with the keys in reverse.
+                            In other words, if the encryption keys are <Latex>{'$K_1$, $K_2$, $K_3$,...,$K_{16}$'}</Latex>,
+                            then the decryption keys are <Latex>{'$K_{16}$, $K_{15}$, $K_{14}$,...,$K_1$'}</Latex>.
+                            Whereas before the plaintext message and the keys were inputted and the ciphertext was the result,
+                            now the reversed keys and the ciphertext are inputted and the original plaintext message is
+                            the result. b</p>
                         <br/>
                         <p>The decrypted message:</p>
                         <p>{this.state.decryptedCiphertext}</p>

@@ -3,6 +3,7 @@ const _ = require('lodash');
 
 
 const sBoxes = getSBoxes();
+const expansionBox = getExpansionBox();
 
 function getSBoxes() {
     // Obtained from: https://www.oreilly.com/library/view/computer-security-and/9780471947837/sec9.3.html
@@ -43,6 +44,13 @@ function getSBoxes() {
     return sBoxes;
  }
 
+ function getExpansionBox(bits){
+    return [31,0,1,2,3,4,3,4,5,6,7,8,7,
+        8,9,10,11,12,11,12,13,14,15,16,15,
+        16,17,18,19,20,19,20,21,22,23,24,23,
+        24,25,26,27,28,27,28,29,30,31,0];
+}
+
 function sBoxBlock({bits, sBoxes}){
     let output = "";
     for (let i = 0; i < 8; i++){
@@ -55,18 +63,9 @@ function sBoxBlock({bits, sBoxes}){
     return output;
  }
 
-function expansionPermutation(bits){
-    const eBox = [31,0,1,2,3,4,3,4,5,6,7,8,7,
-               8,9,10,11,12,11,12,13,14,15,16,15,
-               16,17,18,19,20,19,20,21,22,23,24,23,
-               24,25,26,27,28,27,28,29,30,31,0];
-    return bitHandling.permutate(bits, eBox);
-}
-
-
  function round({L, R, i, keys, P}){
      // Expand right size from 32 to 48 bits
-     const expandedR0 = expansionPermutation(R);
+     const expandedR0 = bitHandling.permutate(R, expansionBox);
 
      // XOR with sub-key i
      const xorWithKey = bitHandling.XOR(expandedR0, keys[i]);
@@ -82,24 +81,6 @@ function expansionPermutation(bits){
 
      // XOR with left side
      const xorWithLeft = bitHandling.XOR(permutatedBlock, L);
-
-     /*
-     if (this.state.setValues && firstRound){
-        this.setState({
-           L0: L,
-           R0: R,
-           expansionBox: P2,
-           afterExpansionBox: expandedR0,
-           afterXorWithKey: xorWithKey,
-           sBox: sBoxes[0],
-           afterSBox: sBoxBlock,
-           permutationBox: P,
-           afterPermutation: permutatedBlock,
-           L1: R,
-           R1: xorWithLeft
-        })
-     }
-      */
 
      // Assign to new right side
      return xorWithLeft;
@@ -118,4 +99,4 @@ function DESRounds({ input, keys, P, initialHalvesCallback }){
     return R + L;
  }
 
-export {DESRounds, sBoxBlock, round, expansionPermutation};
+export {DESRounds, sBoxBlock, round, expansionBox, sBoxes};
