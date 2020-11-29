@@ -296,7 +296,7 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>Public Lock: </Latex>
+                        <Latex>Public Key Becomes: </Latex>
                     </p>
 
                     <p>
@@ -309,6 +309,9 @@ const RsaPage = () => {
                 </ListGroup.Item>
 
                 <ListGroup.Item>
+                    <p>
+                        The private key, <em>d</em> a modular inverse of <Latex>$e \ modulo \ \phi (n)$</Latex>
+                    </p>
                     <p>
                         <Latex>Receiver (decryptor) picks number d:</Latex>
                     </p>
@@ -328,7 +331,7 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>Message to Encrypt</Latex>
+                        <Latex>The Sender picks a message to encrypt</Latex>
                     </p>
                     <div className='user-input'>
                         <Form.Group className='form-inline'>
@@ -342,8 +345,9 @@ const RsaPage = () => {
                 </ListGroup.Item>
 
                 <ListGroup.Item>
+                    <p>This message is then converted to a number <em>m</em> which is commonly the ASCII encryption (translation) of the message</p>
                     <p>
-                        <Latex>ASCII Encryption (Sender/encryptor number m): </Latex>
+                        <Latex>$m:\ $ </Latex>
                     </p>
                     <p>
                         {/* Use ascii_encrypt() here, since we're not rendering anything on screen, we call it as a function */}
@@ -353,10 +357,10 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>Sender (encryptor) sends RSA Encrypted sequence: </Latex>
+                        <Latex>The Sender sends RSA Encrypted sequence (ciphertext) which is calculated by the following formula </Latex>
                     </p>
                     <p>
-                        <Latex>$m^e\:mod\:N\:=\:c$</Latex>
+                        <Latex>$m^e\:mod\:(n)\:=\:c$</Latex>
                         {/* Use rsa_encrypt() here, with message = ascii_encrypt() */}
                         <br/>
                         {rsa_encrypted}
@@ -365,10 +369,10 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>Receiver (decryptor) decrypts RSA Encrypted sequence: </Latex>
+                        <Latex>Receiver (decryptor) decrypts ciphertext $c$ and recieves the ASCII ciphered message m, which is calculated by the following formula</Latex>
                     </p>
                     <p>
-                        <Latex>$c^d\:mod\:N\:=m$</Latex>
+                        <Latex>$c^d\:mod\:(n)\:=m$</Latex>
                         {/* Use rsa_encrypt() here, with message = ascii_encrypt() */}
                         <br/>
                         {rsa_decrypted}
@@ -377,7 +381,7 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>ASCII Decryption: </Latex>
+                        <Latex>Finally, the reciever calculates the ASCII Decryption and recieves the plaintext original message: </Latex>
                     </p>
                     <p>
                         {/* Use ascii_decrypt() here, with message = m from c^d mod N */}
