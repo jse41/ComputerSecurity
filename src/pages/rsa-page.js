@@ -1,7 +1,6 @@
 /* eslint-disable */
 import React, {useEffect, useState} from 'react';
 import Page from '../components/shared/page';
-import Alert from '../components/Alert';
 import Nav from '../components/Nav';
 import '../components/styling/RSA.css';
 import {ListGroup, Form} from 'react-bootstrap';

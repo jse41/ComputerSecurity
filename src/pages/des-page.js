@@ -316,7 +316,8 @@ class DesPage extends React.Component {
                             <b>Final Permutation</b>
                             <br/>
                             <p>After the 16th round, the final 32-bit <Latex>{`$L_{16}$ and $R_{16}$`}</Latex> are
-                                swapped and joined back together into a 64-bit message. The bits of this message are rearranged
+                                swapped and joined back together into a 64-bit message. The bits of this message are
+                                rearranged
                                 again using another permutation table, <Latex>{`$IP^{-1}$`}</Latex>, which yields the
                                 final encrypted message!</p>
                         </p>
@@ -345,16 +346,9 @@ class DesPage extends React.Component {
                     <div className="section">
                         <h4>DES Rounds</h4>
                         <p>This permuted message is then split into <Latex>$L_0$ and $R_0$</Latex>, as follows…</p>
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-12 col-md-6 text-center">
-                                    <BinaryDisplay label="$L_0$" bits={this.state.L0}/>
-                                </div>
-                                <div className="col-12 col-md-6 text-center">
-                                    <BinaryDisplay label="$R_0$" bits={this.state.R0}/>
-                                </div>
-                            </div>
-                        </div>
+                        <p className="text-center">
+                            <Latex>{`$\\underbrace{${this.state.L0}}_{L0}\\text{ }\\underbrace{${this.state.R0}}_{R0}$`}</Latex>
+                        </p>
                         <br/>
                         <p>After this, each <Latex>$L_n$</Latex> and <Latex>$R_n$</Latex> are computed as &nbsp;
                             <Latex>{'$L_n=R_{n-1}$ and $R_n=L_{n-1} \\oplus f(R_{n-1},K_n)$.'}</Latex>
@@ -467,6 +461,20 @@ class DesPage extends React.Component {
                                 </div>
                             </Collapsible>
                         </Card>
+                        <br/>
+                        <p>The results of this process are as follows:</p>
+                        {(this.state.halves || []).map(([L, R], n) => (
+                            n ? <p className="text-center" key={n}>
+                                <Latex>{`$\\underbrace{${L}}_{L_{${n}}}\\text{ }\\underbrace{${R}}_{R_{${n}}}$`}</Latex>
+                            </p> : undefined
+                        ))}
+                    </div>
+                    <div>
+                        <h4>Final Permutation</h4>
+                        <p>
+                            <Latex>{'$L_{16}$ and $R_{16}$'}</Latex> are then combined, and permuted using the final permutation
+                            table <Latex>{'$IP^{-1}$'}</Latex>, which yields the final encrypted message.
+                        </p>
                     </div>
                     <div className="section">
                         <h1>Results</h1>
