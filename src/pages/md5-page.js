@@ -367,7 +367,7 @@ class Md5Page extends React.Component {
             bCur: hex([curHash[1]]),
             cCur: hex([curHash[2]]),
             dCur: hex([curHash[3]]),
-            numIteration: this.state.numIteration + 1,
+            //numIteration: this.state.numIteration + 1,
             disableButton: true
          })
          let nextIter = this.state.iteration + 1
@@ -398,7 +398,7 @@ class Md5Page extends React.Component {
                 <p><b>ASCII (bit code) Representation of Your Message</b></p>
                 <p>{this.state.ascii}</p>
                 <hr/>
-                <p><b>Resulting MD5 Hash</b></p>
+                <p><b>Resulting MD5 Hash in Hex</b></p>
                 <p>{this.state.result}</p>
                 <hr/>
                 <p><b>How Does it Work?</b></p>
@@ -420,7 +420,9 @@ class Md5Page extends React.Component {
                 <p>D: {this.state.dCur}</p>
                 <p>Iteration: {this.state.numIteration}</p>
                 <p>{this.state.warning}</p>
-                <p style={{textAlign: 'left'}}>Each MD5 operation utilizes one of four possible functions, and a different one is used each round:</p>
+                <p>The result of the function is output into the <b>B</b> variable each iteration. You can see the rest of the variable values are just circularly
+                shifted into the following variable (B into C, C into D, and D into A).</p>
+                <p style={{textAlign: 'left'}}>Each MD5 operation utilizes one of four possible bitwise functions, and the function shifts after 16 rounds:</p>
                 <Latex>{'$$F(B,C,D)=(B \\land C) \\lor (\\lnot B \\land D)$$'}</Latex>
                 <br/>
                 <Latex>{'$$G(B,C,D)=(B \\land D) \\lor (C \\land \\lnot D)$$'}</Latex>
@@ -428,6 +430,7 @@ class Md5Page extends React.Component {
                 <Latex>{'$$H(B,C,D)=B \\oplus C \\oplus D$$'}</Latex>
                 <br/>
                 <Latex>{'$$I(B,C,D)=C \\oplus (B \\lor \\lnot D)$$'}</Latex>
+                <p></p>
 
              </Form>
           </Page>
