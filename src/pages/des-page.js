@@ -89,7 +89,7 @@ class DesPage extends React.Component {
         return paddedMessage;
     }
 
-    encryptBlock({ originalBinary, keys, IP, P, FP, setStateOnFirst = false }) {
+    encryptBlock({originalBinary, keys, IP, P, FP, setStateOnFirst = false}) {
         // Encrypts each 64 bit block
         const N_BITS = 64;
         let output = "";
@@ -332,7 +332,8 @@ class DesPage extends React.Component {
                             <b>Final Permutation</b>
                             <br/>
                             <p>After the 16th round, the final 32-bit <Latex>{`$L_{16}$ and $R_{16}$`}</Latex> are
-                                swapped and joined back together into a 64-bit message. The bits of this message are rearranged
+                                swapped and joined back together into a 64-bit message. The bits of this message are
+                                rearranged
                                 again using another permutation table, <Latex>{`$IP^{-1}$`}</Latex>, which yields the
                                 final encrypted message!</p>
                         </p>
@@ -377,7 +378,7 @@ class DesPage extends React.Component {
                                     This operation expands <Latex>$R_i$</Latex> from 32 bits to 48 bits. This done by
                                     using this permutation table to repeat certain bits in order to make the right side
                                     longer.
-                                    </p>
+                                </p>
                                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                     <Latex>$Expansion$ $Permuation=$</Latex>&nbsp;
                                     <PermutationTable table={this.state.expansionBox} columns={8}/>
@@ -408,13 +409,20 @@ class DesPage extends React.Component {
                                 <p>After Permutation: {this.state.afterPermutation}</p>
                             </Collapsible>
                         </Card>
-                        <br />
+                        <br/>
                         <p>The results of this process are as follows:</p>
                         {(this.state.halves || []).map(([L, R], n) => (
                             n ? <p className="text-center" key={n}>
                                 <Latex>{`$\\underbrace{${L}}_{L_{${n}}}\\text{ }\\underbrace{${R}}_{R_{${n}}}$`}</Latex>
                             </p> : undefined
                         ))}
+                    </div>
+                    <div>
+                        <h4>Final Permutation</h4>
+                        <p>
+                            <Latex>{'$L_{16}$ and $R_{16}$'}</Latex> are then combined, and permuted using the final permutation
+                            table <Latex>{'$IP^{-1}$'}</Latex>, which yields the final encrypted message.
+                        </p>
                     </div>
                     <div className="section">
                         <h1>Results</h1>
@@ -424,10 +432,13 @@ class DesPage extends React.Component {
                     </div>
                     <div className="section">
                         <h1>Decryption</h1>
-                        <p>DES decrypts a message using the same algorithm in the same order, but with the keys in reverse.
-                            In other words, if the encryption keys are <Latex>{'$K_1$, $K_2$, $K_3$,...,$K_{16}$'}</Latex>,
+                        <p>DES decrypts a message using the same algorithm in the same order, but with the keys in
+                            reverse.
+                            In other words, if the encryption keys
+                            are <Latex>{'$K_1$, $K_2$, $K_3$,...,$K_{16}$'}</Latex>,
                             then the decryption keys are <Latex>{'$K_{16}$, $K_{15}$, $K_{14}$,...,$K_1$'}</Latex>.
-                            Whereas before the plaintext message and the keys were inputted and the ciphertext was the result,
+                            Whereas before the plaintext message and the keys were inputted and the ciphertext was the
+                            result,
                             now the reversed keys and the ciphertext are inputted and the original plaintext message is
                             the result. b</p>
                         <br/>
