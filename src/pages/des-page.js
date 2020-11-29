@@ -10,6 +10,7 @@ import PermutationTable from "../components/shared/permutation-table";
 import Page from "../components/shared/page";
 import UTFDisplay from "../components/shared/utf-display";
 import Latex from 'react-latex';
+import Table from "react-bootstrap/Table";
 
 /**
  * About Page Wrapper, relies on React Router for routing to here
@@ -496,12 +497,36 @@ class DesPage extends React.Component {
                     </div>
                     <div className="section">
                         <h1>Results</h1>
-                        <p><BinaryDisplay label="Your encrypted message" bits={this.state.encryptedBits}/>
-                            <br/>
-                            Your encrypted message in hexadecimal:
-                            <br/>
-                            {this.bitsToHex(this.state.encryptedBits)}</p>
-                        <br/>
+                        <Table bordered>
+                            <thead>
+                            <tr>
+                                <th />
+                                <th>Input</th>
+                                <th>Output</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><span style={{ whiteSpace: 'nowrap' }}>UTF-8</span></td>
+                                <td>{this.state.plaintext}</td>
+                                <td>{bitHandling.bitsToStr(this.state.encryptedBits)}</td>
+                            </tr>
+                            <tr>
+                                <td>Hex</td>
+                                <td>{this.bitsToHex(bitHandling.strToBits(this.state.plaintext))}</td>
+                                <td>{this.bitsToHex(this.state.encryptedBits)}</td>
+                            </tr>
+                            <tr>
+                                <td>Binary</td>
+                                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', wordBreak: 'break-word' }}>
+                                    {bitHandling.strToBits(this.state.plaintext)}
+                                </td>
+                                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', wordBreak: 'break-word' }}>
+                                    {this.state.encryptedBits}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </Table>
                     </div>
                     <div className="section">
                         <h1>Decryption</h1>
