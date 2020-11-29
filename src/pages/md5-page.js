@@ -225,10 +225,11 @@ function makePretty(arr) {
       for(let index = 0; index < arr[outer].length; index++) {
          //result += bitsToStr(arr[outer][index])
          result += (arr[outer][index]).toString(2)
-         result += ", "
+         if (index + 1 !== arr[outer].length)
+            result += ", "
       }
    }
-   return result
+   return result.replace("-", "1")
 }
 
 // The cycle for actual bit manipulation
@@ -352,7 +353,6 @@ class Md5Page extends React.Component {
    handleClick(e) {
       let result = this.state.iterator.next().value
       if (result) {
-         console.log(result)
          this.setState({
             aCur: hex([result['a']]),
             bCur: hex([result['b']]),
