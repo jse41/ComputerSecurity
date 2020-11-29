@@ -23,7 +23,7 @@ class DesPage extends React.Component {
         this.state = {
             isToggleOn: true,
             plaintext: "Hello world!",
-            key: "xcdf",
+            key: "akey",
             encryptedBits: "",
             decryptedCiphertext: "",
             keys: [],
@@ -513,8 +513,8 @@ class DesPage extends React.Component {
                             </tr>
                             <tr>
                                 <td>Hex</td>
-                                <td>{this.bitsToHex(bitHandling.strToBits(this.state.plaintext))}</td>
-                                <td>{this.bitsToHex(this.state.encryptedBits)}</td>
+                                <td style={{ wordBreak: 'break-word' }}>{this.bitsToHex(bitHandling.strToBits(this.state.plaintext))}</td>
+                                <td style={{ wordBreak: 'break-word' }}>{this.bitsToHex(this.state.encryptedBits)}</td>
                             </tr>
                             <tr>
                                 <td>Binary</td>
