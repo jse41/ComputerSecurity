@@ -283,6 +283,17 @@ function* md5cycleIterations(x, k) {
    // Return happens since the values in x are returned
 }
 
+function makeASCII(input) {
+   if (input === "") {
+      return "Input a message"
+   }
+   var output = ""
+   for (var i = 0; i < input.length; i++) {
+      output += input[i].charCodeAt(0).toString(2) + " ";
+   }
+   return output
+}
+
 var curHash = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
 
 /**
@@ -297,6 +308,7 @@ class Md5Page extends React.Component {
          isToggleOn: true,
          message: "",
          result: md5(""),
+         ascii: "Input a message",
          cipher: "",
          clear: "",
          aCur: hex([curHash[0]]),
@@ -321,6 +333,7 @@ class Md5Page extends React.Component {
          this.setState({
             message: input,
             result: md5(input),
+            ascii: makeASCII(input),
             encoded: blocks,
             aCur: hex([initials[0]]),
             bCur: hex([initials[1]]),
@@ -367,24 +380,26 @@ class Md5Page extends React.Component {
    render() {
       return (
           <Page title="MD5">
-             <p>MD5 (or the Fifth Generation of the Message-Digest Algorithm) is a hashing function that yields a 128-bit hash of any length message </p>
+             <p>MD5 (or the Fifth Generation of the Message-Digest Algorithm) is a hashing function that yields a 128-bit hash of any length message. </p>
              <Form>
                 <Form.Group controlId="EncryptUpdate">
                    <Form.Label>Message</Form.Label>
-                   <Form.Control type="text" onChange={this.handleFormUpdate} placeholder="Message to Encrypy" />
+                   <Form.Control type="text" onChange={this.handleFormUpdate} placeholder="Message to Encrypt" />
                    <Form.Text className="text-muted">
                       This is the plain text information you want to share.
                    </Form.Text>
                 </Form.Group>
+                <p>This is the ASCII (bit code) representation of your message:</p>
+                <p>{this.state.ascii}</p>
+                <hr></hr>
+                <p>This is the resulting MD5 hash:</p>
                 <p>{this.state.result}</p>
-                <br></br>
-                <br></br>
-                <p>This is what the encoded message looks like</p>
+                <hr></hr>
+                <p>This is what the encoded message looks like:</p>
                 <p>{this.state.encoded}</p>
-                <br></br>
-                <br></br>
+                <hr></hr>
                 <Button variant="primary" onClick={this.handleClick}>Iteration</Button>
-                <p>This is what step by step of the algorithm looks like: </p>
+                <p>This is what step by step of the algorithm looks like</p>
                 <p>A: {this.state.aCur}</p>
                 <p>B: {this.state.bCur}</p>
                 <p>C: {this.state.cCur}</p>
