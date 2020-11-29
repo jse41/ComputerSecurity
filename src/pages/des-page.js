@@ -49,6 +49,10 @@ class DesPage extends React.Component {
         this.doEncryption = this.doEncryption.bind(this);
     }
 
+    async setStateSync(state) {
+        return new Promise(resolve => this.setState(state, resolve));
+    }
+
     componentDidMount() {
         this.doEncryption();
     }
