@@ -220,7 +220,6 @@ function makeDisplayBlock(s) {
 } 
 
 function makePretty(arr) {
-   console.log(arr)
    let result = ""; 
    for (let outer = 0; outer < arr.length; outer++) {
       for(let index = 0; index < arr[outer].length; index++) {
@@ -354,7 +353,6 @@ class Md5Page extends React.Component {
    handleClick(e) {
       let result = this.state.iterator.next().value
       if (result) {
-         console.log(result)
          this.setState({
             aCur: hex([result['a']]),
             bCur: hex([result['b']]),
