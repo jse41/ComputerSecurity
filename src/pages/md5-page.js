@@ -220,15 +220,17 @@ function makeDisplayBlock(s) {
 } 
 
 function makePretty(arr) {
+   console.log(arr)
    let result = ""; 
    for (let outer = 0; outer < arr.length; outer++) {
       for(let index = 0; index < arr[outer].length; index++) {
          //result += bitsToStr(arr[outer][index])
          result += (arr[outer][index]).toString(2)
-         result += ", "
+         if (index + 1 !== arr[outer].length)
+            result += ", "
       }
    }
-   return result
+   return result.replace("-", "1")
 }
 
 // The cycle for actual bit manipulation
