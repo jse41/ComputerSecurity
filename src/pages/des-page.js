@@ -89,11 +89,23 @@ class DesPage extends React.Component {
         return paddedMessage;
     }
 
-    encryptBlock({originalBinary, keys, IP, P, FP}) {
+    encryptBlock({ originalBinary, keys, IP, P, FP, setStateOnFirst = false }) {
         // Encrypts each 64 bit block
         const N_BITS = 64;
         let output = "";
         let firstRound = true;
+
+        const displayValuesCallback = (halves, eBox, sBox) => {
+            if (firstRound && setStateOnFirst) {
+                this.setState({
+                    L0: halves[0][0],
+                    R0: halves[0][1],
+                    halves,
+                    expansionBox: eBox,
+                    sBox: sBox,
+                });
+            }
+        };
 
         for (let block of _.chunk(originalBinary, N_BITS).map(b => b.join(''))) {
             const initialPermutation = bitHandling.permutate(block, IP);
@@ -103,19 +115,13 @@ class DesPage extends React.Component {
                 input: initialPermutation,
                 keys,
                 P,
-                initialHalvesCallback: (L, R, eBox, sBox) => this.setState({
-                    L0: L,
-                    R0: R,
-                    expansionBox: eBox,
-                    sBox: sBox
-
-                }),
+                displayValuesCallback,
             });
 
             const finalPermutation = bitHandling.permutate(afterDESRounds, FP);
             output += finalPermutation;
 
-            if (this.state.setValues && firstRound) {
+            if (this.state.setValues && firstRound && setStateOnFirst) {
                 this.setState({
                     first64Bits: block,
                     afterInitialPermutation: initialPermutation
@@ -162,6 +168,7 @@ class DesPage extends React.Component {
             IP,
             P,
             FP,
+            setStateOnFirst: true,
         });
 
         // Convert encrypted number to characters for the encrypted message
@@ -354,16 +361,9 @@ class DesPage extends React.Component {
                     <div className="section">
                         <h4>DES Rounds</h4>
                         <p>This permuted message is then split into <Latex>$L_0$ and $R_0$</Latex>, as follows…</p>
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-12 col-md-6 text-center">
-                                    <BinaryDisplay label="$L_0$" bits={this.state.L0}/>
-                                </div>
-                                <div className="col-12 col-md-6 text-center">
-                                    <BinaryDisplay label="$R_0$" bits={this.state.R0}/>
-                                </div>
-                            </div>
-                        </div>
+                        <p className="text-center">
+                            <Latex>{`$\\underbrace{${this.state.L0}}_{L0}\\text{ }\\underbrace{${this.state.R0}}_{R0}$`}</Latex>
+                        </p>
                         <br/>
                         <p>After this, each <Latex>$L_n$</Latex> and <Latex>$R_n$</Latex> are computed as &nbsp;
                             <Latex>{'$L_n=R_{n-1}$ and $R_n=L_{n-1} \\oplus f(R_{n-1},K_n)$.'}</Latex>
@@ -408,6 +408,13 @@ class DesPage extends React.Component {
                                 <p>After Permutation: {this.state.afterPermutation}</p>
                             </Collapsible>
                         </Card>
+                        <br />
+                        <p>The results of this process are as follows:</p>
+                        {(this.state.halves || []).map(([L, R], n) => (
+                            n ? <p className="text-center" key={n}>
+                                <Latex>{`$\\underbrace{${L}}_{L_{${n}}}\\text{ }\\underbrace{${R}}_{R_{${n}}}$`}</Latex>
+                            </p> : undefined
+                        ))}
                     </div>
                     <div className="section">
                         <h1>Results</h1>

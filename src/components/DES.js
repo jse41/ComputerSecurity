@@ -86,15 +86,19 @@ function sBoxBlock({bits, sBoxes}){
      return xorWithLeft;
  }
 
-function DESRounds({ input, keys, P, initialHalvesCallback }){
+function DESRounds({ input, keys, P, displayValuesCallback }){
+
     // Does the 16 rounds of DES for a 64 bit block
     let [L, R] = bitHandling.makeHalves(input);
-    initialHalvesCallback(L, R);
+    const displayValues = [[L, R]];
 
     // Performs 16 rounds of DES
     for (let i = 0; i < 16; i++){
        [L, R] = [R, round({L, R, i, keys, P})];
+       displayValues.push([L, R]);
     }
+
+    displayValuesCallback(displayValues);
 
     return R + L;
  }
