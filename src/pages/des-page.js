@@ -109,12 +109,11 @@ class DesPage extends React.Component {
                         afterSBox: afterSBox,
                         afterPermutation: permutatedBlock,
                         afterXorWithLeft: xorWithLeft
-                    })
+                    }),
+                halvesCallback: isSavedInState ? (halves => this.setState({ halves })) : (() => {}),
             });
 
             isFirstRound = false;
-
-            //initialHalvesCallback: (L, R) => this.setState({L0: L, R0: R}),
 
             const finalPermutation = bitHandling.permutate(afterDESRounds, FP);
             output += finalPermutation;
@@ -353,7 +352,7 @@ class DesPage extends React.Component {
                         <p>After this, each <Latex>$L_n$</Latex> and <Latex>$R_n$</Latex> are computed as &nbsp;
                             <Latex>{'$L_n=R_{n-1}$ and $R_n=L_{n-1} \\oplus f(R_{n-1},K_n)$.'}</Latex>
                         </p>
-                        <p>This is repeated until <Latex>{'$L_{15}$ and $R_{15}$'}</Latex> are computed.</p>
+                        <p>This is repeated until <Latex>{'$L_{16}$ and $R_{16}$'}</Latex> are computed.</p>
                         <Card style={{padding: '0.5em 1em'}}>
                             <Collapsible trigger={<Latex>$f$ function (show more)</Latex>}
                                          triggerWhenOpen={<Latex>$f$ function (hide)</Latex>}>
@@ -368,8 +367,10 @@ class DesPage extends React.Component {
                                 <div className="section">
                                     <p><b>Expansion Box</b>
                                         <br/>
-                                        This operation expands <Latex>$R_i$</Latex> from 32 bits to 48 bits. This done by
-                                        using this permutation table to repeat certain bits in order to make the right side
+                                        This operation expands <Latex>$R_i$</Latex> from 32 bits to 48 bits. This done
+                                        by
+                                        using this permutation table to repeat certain bits in order to make the right
+                                        side
                                         longer.
                                     </p>
                                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -377,50 +378,70 @@ class DesPage extends React.Component {
                                         <PermutationTable table={expansionBox} columns={8}/>
                                     </div>
                                     <p><BinaryDisplay label="Initial Right Side" bits={this.state.R0}/></p>
-                                    <p><BinaryDisplay label="After Expansion" bits={this.state.afterExpansionBox}/> </p>
+                                    <p><BinaryDisplay label="After Expansion" bits={this.state.afterExpansionBox}/></p>
                                 </div>
                                 <div className="section">
                                     <p><b>XOR</b>
-                                    <br/>
-                                    The bits are then XORed with the key corresponding to that round. For example, in the
-                                    first round, the bits will be XORed with <Latex>{`$K_1$`}</Latex>, then with
-                                    <Latex>{` $K_2$`}</Latex> in the second round, and so forth, until XORing with
-                                    <Latex>{` $K_{16}$`}</Latex> in the last round.</p>
+                                        <br/>
+                                        The bits are then XORed with the key corresponding to that round. For example,
+                                        in the
+                                        first round, the bits will be XORed with <Latex>{`$K_1$`}</Latex>, then with
+                                        <Latex>{` $K_2$`}</Latex> in the second round, and so forth, until XORing with
+                                        <Latex>{` $K_{16}$`}</Latex> in the last round.</p>
                                     <p><BinaryDisplay label="The First Key" bits={this.state.keys[0]}/></p>
-                                    <p><BinaryDisplay label="After XOR" bits={this.state.afterXorWithKey}/> </p>
+                                    <p><BinaryDisplay label="After XOR" bits={this.state.afterXorWithKey}/></p>
                                 </div>
                                 <div className="section">
                                     <p><b>S-Box Substitution</b></p>
                                     <Card style={{padding: '0.5em 1em'}}>
                                         <Collapsible trigger="(show more)"
                                                      triggerWhenOpen="(hide)">
-                                            <p>The S-Box Substitution takes the 48 bit output for the XOR with the key, and
-                                                shrinks it back down to 32 bits. This operation is done by separating the 48
-                                                bits into 8 6-bit block. There are 8 corresponding S-Boxes, which are each
-                                                a 4 by 16 table of 4-bit entries. Each of the 6-bit input blocks is operated
-                                                on by a separate S-box, for example, the first block uses the first S-Box,
-                                                and so forth. The bits in the input block specify the output entry in the
-                                                S-Box table. For an input block of <Latex>$b_1$, $b_2$, $b_3$, $b_4$, $b_5$,
-                                                    $b_6$</Latex>, the bits <Latex>$b_1$ and $b_6$</Latex> corresponds to
+                                            <p>The S-Box Substitution takes the 48 bit output for the XOR with the key,
+                                                and
+                                                shrinks it back down to 32 bits. This operation is done by separating
+                                                the 48
+                                                bits into 8 6-bit block. There are 8 corresponding S-Boxes, which are
+                                                each
+                                                a 4 by 16 table of 4-bit entries. Each of the 6-bit input blocks is
+                                                operated
+                                                on by a separate S-box, for example, the first block uses the first
+                                                S-Box,
+                                                and so forth. The bits in the input block specify the output entry in
+                                                the
+                                                S-Box table. For an input block of <Latex>$b_1$, $b_2$, $b_3$, $b_4$,
+                                                    $b_5$,
+                                                    $b_6$</Latex>, the bits <Latex>$b_1$ and $b_6$</Latex> corresponds
+                                                to
                                                 the row number of the table, while the bits <Latex>$b_2$, $b_3$, $b_4$,
-                                                    $b_5$</Latex> denote the column number. The 4-bit output is retrieved
-                                                for the S-Box table using this row and column number. This is repeated for
+                                                    $b_5$</Latex> denote the column number. The 4-bit output is
+                                                retrieved
+                                                for the S-Box table using this row and column number. This is repeated
+                                                for
                                                 all 8 blocks.</p>
-                                            <p><BinaryDisplay label="First 6 bits of input" bits={this.state.afterXorWithKey.substring(0, 6)}/></p>
+                                            <p><BinaryDisplay label="First 6 bits of input"
+                                                              bits={this.state.afterXorWithKey.substring(0, 6)}/></p>
                                             <p><BinaryDisplay label="Row (formed with the first and last bit of the
-                                                input)" bits={this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}/></p>
+                                                input)"
+                                                              bits={this.state.afterXorWithKey.charAt(0) + this.state.afterXorWithKey.charAt(5)}/>
+                                            </p>
                                             <p><BinaryDisplay label="Column (formed with the middle 4 bits of the
                                                 input)" bits={this.state.afterXorWithKey.substring(1, 5)}/></p>
-                                            <p>Using the row and column calculated above, the corresponding table entry at
+                                            <p>Using the row and column calculated above, the corresponding table entry
+                                                at
                                                 that location is the new output.</p>
-                                            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
                                                 <Latex>S-Box$=$</Latex>&nbsp;
                                                 <PermutationTable table={sBoxes[0]} columns={16}/>
                                             </div>
                                             <p>The row and column correspond to the entry of value
-                                                <Latex>{` ${parseInt(this.state.afterSBox.substring(0,4),2)}. `}</Latex>
+                                                <Latex>{` ${parseInt(this.state.afterSBox.substring(0, 4), 2)}. `}</Latex>
                                                 This is converted to binary to become the output. </p>
-                                            <p><BinaryDisplay label="Output" bits={this.state.afterSBox.substring(0,4)}/></p>
+                                            <p><BinaryDisplay label="Output"
+                                                              bits={this.state.afterSBox.substring(0, 4)}/></p>
                                         </Collapsible>
                                     </Card>
                                 </div>
@@ -428,11 +449,11 @@ class DesPage extends React.Component {
                                     <p><b>Permutation</b>
                                         <br/>
                                         The bits are then permutated again with a different permutation table.</p>
-                                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                                            <Latex>$P=$</Latex>&nbsp;
-                                            <PermutationTable table={this.state.permutationBox} columns={8}/>
-                                        </div>
-                                        <p><BinaryDisplay label="After Permutation" bits={this.state.afterPermutation}/></p>
+                                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                        <Latex>$P=$</Latex>&nbsp;
+                                        <PermutationTable table={this.state.permutationBox} columns={8}/>
+                                    </div>
+                                    <p><BinaryDisplay label="After Permutation" bits={this.state.afterPermutation}/></p>
                                 </div>
                                 <div className="section">
                                     <p><b>XOR</b>
@@ -454,25 +475,29 @@ class DesPage extends React.Component {
                                 </div>
                             </Collapsible>
                         </Card>
-                        <br/>   
-                        <p>The results of this process are as follows:</p>
-                        {(this.state.halves || []).map(([L, R], n) => (
-                            n ? <p className="text-center" key={n}>
-                                <Latex>{`$\\underbrace{${L}}_{L_{${n}}}\\text{ }\\underbrace{${R}}_{R_{${n}}}$`}</Latex>
-                            </p> : undefined
-                        ))}
+                        <br/>
+                        <Card style={{padding: '0.5em 1em'}}>
+                            <Collapsible trigger="See the results of the DES rounds" triggerWhenOpen="Hide">
+                                {(this.state.halves || []).map(([L, R], n) => (
+                                    <p className="text-center" key={n}>
+                                        <Latex>{`$\\underbrace{${L}}_{L_{${n}}}\\text{ }\\underbrace{${R}}_{R_{${n}}}$`}</Latex>
+                                    </p>
+                                ))}
+                            </Collapsible>
+                        </Card>
+                        <br />
                     </div>
                     <div>
                         <h4>Final Permutation</h4>
                         <p>
-                            <Latex>{'$L_{16}$ and $R_{16}$'}</Latex> are then combined, and permuted using the final permutation
-                            table <Latex>{'$IP^{-1}$'}</Latex>, which yields the final encrypted message.
+                            <Latex>{'$L_{16}$ and $R_{16}$'}</Latex> are then combined, and permuted using the final
+                            permutation table <Latex>{'$IP^{-1}$'}</Latex>, which yields the final encrypted message.
                         </p>
                     </div>
                     <div className="section">
                         <h1>Results</h1>
                         <p><BinaryDisplay label="Your encrypted message" bits={this.state.encryptedBits}/>
-                        <br/>
+                            <br/>
                             Your encrypted message in hexadecimal:
                             <br/>
                             {this.bitsToHex(this.state.encryptedBits)}</p>
@@ -480,10 +505,13 @@ class DesPage extends React.Component {
                     </div>
                     <div className="section">
                         <h1>Decryption</h1>
-                        <p>DES decrypts a message using the same algorithm in the same order, but with the keys in reverse.
-                            In other words, if the encryption keys are <br/><Latex>{'$K_1$, $K_2$, $K_3$,...,$K_{16}$'}</Latex>,
+                        <p>DES decrypts a message using the same algorithm in the same order, but with the keys in
+                            reverse.
+                            In other words, if the encryption keys
+                            are <br/><Latex>{'$K_1$, $K_2$, $K_3$,...,$K_{16}$'}</Latex>,
                             then the decryption keys are <Latex>{'$K_{16}$, $K_{15}$, $K_{14}$,...,$K_1$'}</Latex>.
-                            Whereas before the plaintext message and the keys were inputted and the ciphertext was the result,
+                            Whereas before the plaintext message and the keys were inputted and the ciphertext was the
+                            result,
                             now the ciphertext and the reversed keys are inputted and the original plaintext message is
                             the result. </p>
                         <br/>

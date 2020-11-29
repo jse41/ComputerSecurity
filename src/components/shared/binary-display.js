@@ -9,7 +9,7 @@ class BinaryDisplay extends React.Component {
         const chunked = _.chunk(binary.split(''), chunkSize).map(bits => bits.join('')).join(' ');
         const style = _.merge({}, { fontFamily: 'monospace', fontSize: '1.2rem' }, this.props.style);
         return (
-            <div>
+            <div style={{ wordBreak: 'break-word' }}>
                 {this.props.label &&
                     <Latex>{this.props.label}</Latex>}
                     {this.props.label && ': '}
