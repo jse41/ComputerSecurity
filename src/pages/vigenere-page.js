@@ -247,7 +247,16 @@ class VigenerePage extends React.Component {
 
    render() {
       return (
-          <Page title="Vigenere Cipher">
+          <Page title="Vigen&#232;re Cipher">
+             <p style={{textAlign: 'left'}}>The Vigen&#232;re Cipher is a modified version of the Caesar Cipher, where instead offset for the message being some fixed value, it is instead linked to a key 
+                which contains many varying offsets. This key could be one value, making this a Caesar Cipher, or instead it could be the length of the message, a form of security 
+                that is still sound today and used by Intelligence Agencies where agreed keys are known. Typically the key is somewhere between these two extremes, and looped for the
+                length of the message. The longer the key with respect to the message, the stronger the security of the cypher. When the key is too short, statistical attacks are 
+                still valid attacks on the message.
+             </p>
+             <br></br>
+             <h3>Encryption!</h3>
+             <p style={{textAlign: 'left'}}>Enter a message and key to try it yourself!</p>
              <Form>
                 <Form.Group controlId="EncryptUpdate">
                    <Form.Label>Message</Form.Label>
@@ -274,6 +283,9 @@ class VigenerePage extends React.Component {
                   </Col>
                </Row>
             </Container>
+            <br></br>
+            <p style={{textAlign: 'left'}}>This encoded message could be transmitted to anyone who agrees on the numerical values of characters, and so long as they have 
+            the key, they would be able to decrypt and read the original message. Typically, the difficult part of the internet security is agreeing on this key value. </p>
              
              <br></br>
              <fieldset>
@@ -301,7 +313,9 @@ class VigenerePage extends React.Component {
                   </Col>
                </Form.Group>
             </fieldset>
+            <p><small>This is just agreeing on a standard for character number relations</small></p>
              <br></br>
+             <h3>Understanding the Encypytion Process!</h3>
              <Container>
                 <Row>
                    <Col sm={1}><br></br><br></br><Button id='LeftSelect' variant="secondary" onClick={this.handleScroll}>Left</Button></Col>
@@ -337,13 +351,20 @@ class VigenerePage extends React.Component {
                 </Row>
              </Container>
              <p><small>{this.state.modNote}</small></p>
+             <p style={{textAlign: 'left'}}>This table looks at the message letter by letter, communicating the string form of a character as you would see it, as well as the 
+             number representation that goes along with it. This allows us to see that the result is just the character with the sum of the message value and the key value.</p>
              <br></br>
+             <h3>Decryption</h3>
+             <p style={{textAlign: 'left'}}>
+                The decryption process is very similar, instead of adding the values of the message and the key, instead it subtracts the key value from the cypher value of that 
+                character. Here you can see that you need to agree on the key value for the cypher text to have its meaning. 
+             </p>
              <Form>
                 <Form.Group controlId="cipherUpdate">
-                   <Form.Label>Cipher</Form.Label>
-                   <Form.Control type="text" onChange={this.handleFormUpdate} placeholder="The Cipher Text" />
+                   <Form.Label>Cypher</Form.Label>
+                   <Form.Control type="text" onChange={this.handleFormUpdate} placeholder="The Cypher Text" />
                    <Form.Text className="text-muted">
-                      This is the cipher text you received.
+                      This is the cypher text you received.
                    </Form.Text>
                 </Form.Group>
 
@@ -363,6 +384,9 @@ class VigenerePage extends React.Component {
                   </Col>
                </Row>
             </Container>
+            <br></br>
+            <p style={{textAlign: 'left'}}>And just like that, the encrypted message is achievable again from a seemingly garbled message. You should always remember though
+            that this method has its weaknesses, especially when the messages grow in length compared to the key.</p>
              <br></br>
              <br></br>
              <p><small>*Visual Character Set is a selected subset of characters that are all able to be rendered easily in browsers, opposed to ASCII. Not an industry standard.</small></p>

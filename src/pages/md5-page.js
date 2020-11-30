@@ -225,11 +225,10 @@ function makePretty(arr) {
       for(let index = 0; index < arr[outer].length; index++) {
          //result += bitsToStr(arr[outer][index])
          result += (arr[outer][index]).toString(2)
-         if (index + 1 !== arr[outer].length)
-            result += ", "
+         result += ", "
       }
    }
-   return result.replace("-", "1")
+   return result
 }
 
 // The cycle for actual bit manipulation
@@ -273,6 +272,7 @@ function* md5cycleIterations(x, k) {
       c = b
       b = F
       let iterum = {'a': a, 'b': b, 'c': c, 'd': d}
+      console.log(iterum)
       yield(iterum)
    }
 
@@ -316,7 +316,8 @@ class Md5Page extends React.Component {
          dCur: hex([curHash[3]]),
          iterator: md5cycleIterations(curHash, blocks[0]), 
          iteration: 0,
-         encoded: makePretty(blocks),
+         encodedPretty: makePretty(blocks),
+         encoded: blocks,
          warning: "",
          numIteration: 0,
          disableButton: true,
@@ -353,32 +354,53 @@ class Md5Page extends React.Component {
    handleClick(e) {
       let result = this.state.iterator.next().value
       if (result) {
-         this.setState({
-            aCur: hex([result['a']]),
-            bCur: hex([result['b']]),
-            cCur: hex([result['c']]),
-            dCur: hex([result['d']]),
-            numIteration: this.state.numIteration + 1
-         }) 
+         if (this.state.numIteration !== 63) {
+            this.setState({
+               aCur: hex([result['a']]),
+               bCur: hex([result['b']]),
+               cCur: hex([result['c']]),
+               dCur: hex([result['d']]),
+               numIteration: this.state.numIteration + 1
+            }) 
+         }
+         else{
+            result = this.state.iterator.next().value
+            let temp = JSON.parse(JSON.stringify(curHash))
+            //for(let index = 0; index < 4; index++) {
+            //   temp.push(curHash[index])
+            //}
+            console.log(temp)
+            this.setState({
+               aCur: hex([temp[0]]),
+               bCur: hex([temp[1]]),
+               cCur: hex([temp[2]]),
+               dCur: hex([temp[3]]),
+               numIteration: this.state.numIteration + 1,
+               //disableButton: true
+            })
+         }
+         
       }
       else {
-         this.setState({
-            aCur: hex([curHash[0]]),
-            bCur: hex([curHash[1]]),
-            cCur: hex([curHash[2]]),
-            dCur: hex([curHash[3]]),
-            //numIteration: this.state.numIteration + 1,
-            disableButton: true
-         })
          let nextIter = this.state.iteration + 1
          if (nextIter < this.state.encoded.length) {
+            console.log(this.state.encoded)
+            //console.log(md5cycle(curHash, this.state.encoded[nextIter]))
+            //for(let i = 0; i < 4; i++) {
+            //   console.log(hex(curHash[i]))
+           // }
+           //console.log(hex(curHash))
             this.setState({
                iterator: md5cycleIterations(curHash, this.state.encoded[nextIter]),
                iteration: nextIter,
+               numIteration: 0,
             })
          }
          else {
-            this.setState({warning: 'Done Encrypting! Enter a new message to iterate again.'})
+            this.setState({
+               warning: 'Done Encrypting! Enter a new message to iterate again.',
+               disableButton: true
+            })
          }
       }
    }
@@ -419,8 +441,10 @@ class Md5Page extends React.Component {
                 <p>C: {this.state.cCur}</p>
                 <p>D: {this.state.dCur}</p>
                 <p>Iteration: {this.state.numIteration}</p>
+                <p>Block Number: {this.state.iteration + 1}</p>
                 <p>{this.state.warning}</p>
-                <p>The result of the function is output into the <b>B</b> variable each iteration. You can see the rest of the variable values are just circularly
+                <br></br>
+                <p style={{textAlign: 'left'}}>The result of the function is output into the <b>B</b> variable each iteration. You can see the rest of the variable values are just circularly
                 shifted into the following variable (B into C, C into D, and D into A).</p>
                 <p style={{textAlign: 'left'}}>Each MD5 operation utilizes one of four possible bitwise functions, and the function shifts after 16 rounds:</p>
                 <Latex>{'$$F(B,C,D)=(B \\land C) \\lor (\\lnot B \\land D)$$'}</Latex>

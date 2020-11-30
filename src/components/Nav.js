@@ -38,7 +38,7 @@ function Nav() {
           </li>
           <li className='nav-item'>
             <div className='nav-link'>
-              <Link to='/Vigenere'>Vigenere Cipher</Link>
+              <Link to='/Vigenere'>Vigen&#232;re Cipher</Link>
             </div>
           </li>
           <li className='nav-item'>
