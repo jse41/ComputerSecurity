@@ -164,7 +164,7 @@ function generate_d(e, p, q) {
     var res = "";
     var i;
 
-    for (i = 1; i < phi; i++) {
+    for (i = 1; i < 5*phi; i++) {
         var mod = (i * e) % phi;
 
         if (mod === 1) {
