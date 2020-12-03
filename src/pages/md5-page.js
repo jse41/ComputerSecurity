@@ -2,7 +2,6 @@ import React from 'react';
 import {Form, Button} from 'react-bootstrap';
 import Page from "../components/shared/page";
 import Latex from 'react-latex'
-import { split } from 'lodash';
 //import bitsToStr from "../bit-handling-2";
 //import { result } from 'lodash';
 
@@ -222,6 +221,7 @@ function makeDisplayBlock(s) {
 
 function makePretty(arr) {
    let result = ""; 
+   console.log(arr);
    for (let outer = 0; outer < arr.length; outer++) {
       for(let index = 0; index < arr[outer].length; index++) {
          //result += bitsToStr(arr[outer][index])
@@ -231,23 +231,21 @@ function makePretty(arr) {
       }
    }
    let split_result = result.split(", ")
-   console.log(split_result)
    for (let i = 0; i < split_result.length; i++) {
       // make a string of 0s that is 32 - split_result[i].length long
       let zeros = ""
-      console.log("BEFORE " + split_result[i])
       for (let j = split_result[i].length; j < 32; j++) {
          zeros += "0"
       }
       split_result[i] = zeros + split_result[i]
-      console.log("AFTER " + split_result[i])
    }
    let final_result = "";
    for (let i = 0; i < split_result.length; i++) {
       final_result += split_result[i]
       final_result += ", "
    }
-   return final_result.replace("-", "1")
+   return final_result.replace("-", "1").split(",")
+
 }
 
 // The cycle for actual bit manipulation
