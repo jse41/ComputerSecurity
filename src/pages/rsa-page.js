@@ -131,7 +131,9 @@ function generate_e(p, q) {
     var res = "";
     var i;
 
-    for (i = 2; i < phi; i++) {
+    let count = phi < 1000 ? phi : 1000
+
+    for (i = 2; i < count; i++) {
         if (gcd(i, N) > 1 || gcd(i, phi) > 1) {
             continue
         } else {
@@ -381,7 +383,7 @@ const RsaPage = () => {
 
                 <ListGroup.Item>
                     <p>
-                        <Latex>Finally, the reciever calculates the ASCII Decryption and recieves the plaintext original message: </Latex>
+                        <Latex>Finally, the receiver calculates the ASCII Decryption and recieves the plaintext original message: </Latex>
                     </p>
                     <p>
                         {/* Use ascii_decrypt() here, with message = m from c^d mod N */}
