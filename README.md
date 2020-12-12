@@ -15,7 +15,9 @@ Install Node Package Manager
 1. Run `npm install` in the directory that this was unzipped to
 2. Run `npm start` to create a local web server hosting our website, then select the implementation you want to learn more about and demo, and you are off to the races
 
+## Where to find things?
 
+- All code written by us can be found under the `src/` directory with `src/pages`  and `src/components`  containing most of the work written by us. 
 
 ## Questions? 
 
