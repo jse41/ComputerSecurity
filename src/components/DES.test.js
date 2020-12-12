@@ -5,7 +5,7 @@ const DES = require('./DES');
 it('sBoxBlock', () => {
     const sBoxes = [];
     const box = [];
-    for (var i = 0; i < 64; i++) {
+    for (let i = 0; i < 64; i++) {
         box.push(i);
     }
     sBoxes.push(box, box, box, box, box, box, box, box);
@@ -31,31 +31,6 @@ it('sBoxBlock', () => {
     expectedOutput += (16*0 + 0).toString(2).padStart(4, "0");
 
     expect(DES.sBoxBlock({bits, sBoxes})).toEqual(expectedOutput);
-})
-
-
-it('expansionPermutation', () => {
-    let bits = "";
-    bits += '1010';
-    bits += '1100';
-    bits += '0101';
-    bits += '0111';
-    bits += '1000';
-    bits += '1010';
-    bits += '0100';
-    bits += '0000';
-
-    let expectedOutput = "";
-    expectedOutput += '010101';
-    expectedOutput += '011000';
-    expectedOutput += '001010';
-    expectedOutput += '101111';
-    expectedOutput += '110001';
-    expectedOutput += '010100';
-    expectedOutput += '001000';
-    expectedOutput += '000001';
-
-    expect(DES.expansionPermutation(bits)).toEqual(expectedOutput);
 })
 
 it('DESRounds', () => {

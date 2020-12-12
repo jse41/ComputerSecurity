@@ -91,6 +91,7 @@ function DESRounds({ input, keys, P, isFirstRound, initialCallback, halvesCallba
     let [L, R] = bitHandling.makeHalves(input);
     let isInitialRound = isFirstRound;
 
+    // Add halves in each round for visualization purposes
     halves.push([L, R]);
 
     // Performs 16 rounds of DES
