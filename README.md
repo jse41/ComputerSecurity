@@ -1,3 +1,32 @@
+# Computer Security 
+
+## Group 10
+
+CSDS 344: Computer Security
+
+Group 10: Alessandra Sivilotti, Alex Neyman, Lucas Pham, Lucas Popp, Jason Richards, and Jacob Engelbrecht
+
+December 12, 2020
+
+## Information on how to run
+
+Install Node Package Manager 
+
+1. Run `npm install` in the directory that this was unzipped to
+2. Run `npm start` to create a local web server hosting our website, then select the implementation you want to learn more about and demo, and you are off to the races
+
+
+
+## Questions? 
+
+Feel free to reach out to any of us if you have questions about these algorithms, implementations, or visualizations!
+
+
+
+---
+
+The following is default REACT README
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
